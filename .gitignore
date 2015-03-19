@@ -29,6 +29,7 @@
 *.hex
 *.iso
 *.bin
+*.bxrc
 
 # Debug files
 *.dSYM/
