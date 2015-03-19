@@ -92,13 +92,6 @@ static void handle_input()
 		get_position(0, 14),
 		c2.name,
 		terminal_color);*/
-		
-	printnum(
-		get_position(0, 0),
-		NUM_COMMANDS,
-		terminal_color,
-		10);
-		
 
 	t = poll_key(); // Get input, this really shouldn't be via polling.
 	
@@ -131,19 +124,56 @@ static void handle_input()
 static void parse_input()
 {
 	static struct command* cmdptr;
+
+	if (input_ptr <= 0)						// TODO: Advance the cursor or something.
+		return;								// If there's nothing in the input buffer, nothing to parse.
 	
+	char cmd_string[TERMINAL_INPUT_SIZE];	// Char array to store the command in.
+	char params[TERMINAL_INPUT_SIZE];		// Char array to store the rest of the input buffer (parameters) in.
+	int s = 0;
+	int s_params = 0;
+	
+	//
 	// Separate the input buffer to the first space.
+	//
+	
+	while(input[s] != ' ' || input[s] != 0x0) // Go till a space or null-terminator is encountered.
+	{
+		cmd_string[s] = input[s]; // Copy the string to the array.
+		s++;
+	}
+	
+	s++; // Advance s to the space after the first space.
+	cmd_string[s] = '\0'; // And also null-terminate the command string.
+	
+	while(input[s] != 0x0) // Copy till null-terminator.
+	{
+		params[s_params] = input[s]; 	// Copy the character at s to s_params 
+										// (counter for param characters, instead of input buffer).
+		s++; s_params++;				// And then increment both.
+	}
+	
+	//
 	// Find a command with the same string.
-		cmdptr = find_cmd("help");
-	if(cmdptr != NULL)
-		print(
+	//
+	
+	cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
+	
+	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
+	{
+		print( //TEMP
 			get_position(0, 0),
 			cmdptr->help,
 			terminal_color);
-	// If the command's found, transfer to the handler function.
-	// If not found, try looking for a file?
-	// If neither works, print an error message and return to the terminal.
-	endterm = true; //TEMP
+		// If the command's found, transfer to the handler function.
+	}
+	else
+	{
+		// If not found, try looking for a file?
+		
+		// If neither works, print an error message and return to the terminal.
+	}
+	return;
 }
 
 static void draw_cursor()
