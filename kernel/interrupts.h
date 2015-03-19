@@ -1,0 +1,4 @@
+#ifndef KERNEL_INTERRUPTS
+#define KERNEL_INTERRUPTS
+
+#endif
