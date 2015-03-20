@@ -22,7 +22,13 @@ struct command commands[] =
 char* input;
 int input_ptr;
 
+bool prompt;
+int prompt_x;
+int prompt_y;
+char* prompt_string;
+size_t prompt_string_length;
 char terminal_color;
+
 bool cursor;
 int cursor_x;
 int cursor_y;
@@ -40,9 +46,16 @@ void init_terminal()
 
 	terminal_color = get_color(TERMINAL_FG, TERMINAL_BG); // Set the terminal's default color.
 	
+	prompt = true; // Setup the prompt.
+	prompt_string = PROMPT_STRING;
+	prompt_string_length = strlen(PROMPT_STRING);
+	
+	prompt_x = PROMPT_START_X;
+	prompt_y = PROMPT_START_Y;
+	
 	cursor = true; // Setup the cursor.
-	cursor_x = CURSOR_START_X;
-	cursor_y = CURSOR_START_Y;
+	cursor_x = prompt_string_length + 1;
+	cursor_y = prompt_y;
 	cursor_char = CURSOR_CHAR;
 	cursor_color = get_color(CURSOR_FG, CURSOR_BG);
 }
@@ -52,18 +65,22 @@ void start_terminal()
 	endterm = false;
 	
 	while(!endterm)
-	{
-		draw_cursor();
-	
-		print(
-			get_position(cursor_x + 1, cursor_y),
-			input,
+	{	
+		print( // Print the prompt first.
+			get_position(prompt_x, prompt_y),
+			prompt_string,
 			terminal_color);
+		print( // The input buffer second.
+			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
+			input,														// using the precalculated prompt_string_length.
+			terminal_color);
+			
+		draw_cursor(); // Followed by the cursor.
 		
-		handle_input();
+		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
 		
-		flip();
-		sync();
+		flip(); // Flip the data onto video memory.
+		sync(); // And wait for vsync.
 	}
 	return;
 }
@@ -71,50 +88,34 @@ void start_terminal()
 static void handle_input()
 {
 	static char t = '\0';
-	
-	/*struct command c1 = { "Test1", "Test2", NULL };
-	struct command c2 = { "LONGLONGLONG", "LONGERLONGERLONGERLONGERLONGER", NULL };
-	printnum(
-		get_position(0, 10),
-		sizeof(c1),
-		terminal_color,
-		10);
-	printnum(
-		get_position(0, 11),
-		sizeof(c2),
-		terminal_color,
-		10);
-	print(
-		get_position(0, 13),
-		c1.name,
-		terminal_color);
-	print(
-		get_position(0, 14),
-		c2.name,
-		terminal_color);*/
 
 	t = poll_key(); // Get input, this really shouldn't be via polling.
 	
 	if (t == '\n') // If t == newline (enter), parse input and clear buffer.
 	{
 		parse_input();
+		//TODO: Reset cursor and advance prompt to next empty line.
 		return;
 	}
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)
 	{
+		cursor_x--;
+		if (cursor_x < prompt_string_length + 1)
+			cursor_x = prompt_string_length + 1; // Make sure the cursor never goes behind the prompt.
+		
 		if(input_ptr > 0) // Make sure input_ptr is bigger than zero.
 		{
 			input_ptr--; // Move the pointer back to the last one.
 			input[input_ptr] = '\0'; // And clear the character input_ptr is currently pointing at.
 			putchar(
-				get_position(cursor_x + input_ptr + 1, cursor_y),
+				get_position(prompt_x + input_ptr + 1, prompt_y),
 				' ',
 				terminal_color);
-			//TODO: Cursor?
 		}
 	}
 	else if (input_ptr < TERMINAL_INPUT_SIZE && t != '\0') // Otherwise handle text being added (assuming it's less than max input).
 	{
+		cursor_x++;
 		input[input_ptr] = t;
 		input_ptr++;
 		input[input_ptr] = '\0';

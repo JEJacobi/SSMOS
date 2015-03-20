@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include "hardware.h"
 
-#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
-
 enum scancode curr_scancode;	// Current scancode.
 enum scancode last_scancode;	// Last scancode.
 
@@ -49,12 +47,12 @@ char scan_to_key(enum scancode sc)
 
 bool get_output_status()
 {
-	return CHECK_BIT(get_status(), 0);
+	return check_bit(get_status(), 0);
 	// Check if bit 0 (output buffer status) from the status register is set.
 }
 
 bool get_input_status()
 {
-	return CHECK_BIT(get_status(), 1);
+	return check_bit(get_status(), 1);
 	// Check if bit 1 (input buffer status) from the status register is set.
 }

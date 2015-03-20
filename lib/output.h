@@ -2,11 +2,11 @@
 #define LIB_GRAPHICS
 #include <math.h>
 
-#define VIDEO_MEM	0xb8000	//Location of VGA video memory.
-#define COLUMNS		80		//How many columns of characters.
-#define ROWS		25		//How many rows of characters.
+#define VIDEO_MEM	0xb8000	// Location of VGA video memory.
+#define COLUMNS		80		// How many columns of characters.
+#define ROWS		25		// How many rows of characters.
 
-enum color					//VGA text mode color choices.
+enum color					// VGA text mode color choices.
 {
 	BLACK = 0,
 	BLUE = 1,
@@ -26,12 +26,12 @@ enum color					//VGA text mode color choices.
 	WHITE = 15,
 };
 
-inline int get_position(int x, int y)	//Get the combined position to write to.
+inline int get_position(int x, int y)	// Get the combined position to write to.
 {
 	int val = 0;
-	x = (int)clamp(x, 0, COLUMNS - 1);	//Clamp entries to existing columns and rows.
-	y = (int)clamp(y, 0, ROWS - 1);
-	
+	y = (int)clamp(y, 0, ROWS - 1);							// Clamp entries to existing columns and rows.
+	x = (int)clamp(x, 0, (COLUMNS * (ROWS - y)) - 1);		// Note that x is allowed to overflow to facilitate wordwrapping,
+															// but is locked to the remaining entries (ROWS / y).
 	val += x * 2;
 	val += y * 160;
 	return val;
