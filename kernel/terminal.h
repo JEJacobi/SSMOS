@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "commands.h"
 
-#define PROMPT_STRING			"|>"
+#define PROMPT_STRING			"#>"
 #define PROMPT_START_X			0
 #define PROMPT_START_Y			14
 #define TERMINAL_INPUT_SIZE		256

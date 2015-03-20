@@ -77,9 +77,8 @@ void start_terminal()
 			
 		draw_cursor(); // Followed by the cursor.
 		
-		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
-		
 		flip(); // Flip the data onto video memory.
+		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
 		sync(); // And wait for vsync.
 	}
 	return;
@@ -100,15 +99,15 @@ static void handle_input()
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)
 	{
 		cursor_x--;
-		if (cursor_x < prompt_string_length + 1)
-			cursor_x = prompt_string_length + 1; // Make sure the cursor never goes behind the prompt.
+		if (cursor_x < prompt_string_length)
+			cursor_x = prompt_string_length; // Make sure the cursor never goes behind the prompt.
 		
 		if(input_ptr > 0) // Make sure input_ptr is bigger than zero.
 		{
 			input_ptr--; // Move the pointer back to the last one.
 			input[input_ptr] = '\0'; // And clear the character input_ptr is currently pointing at.
 			putchar(
-				get_position(prompt_x + input_ptr + 1, prompt_y),
+				get_position(prompt_x + prompt_string_length + input_ptr, prompt_y),
 				' ',
 				terminal_color);
 		}
