@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "commands.h"
+#include "debug.h"
 #include "graphics.h"
 #include "math.h"
 #include "memory.h"
@@ -11,12 +12,13 @@
 #include "output.h"
 #include "string.h"
 
-struct command commands[] =
+struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
 		{ "help", "Get a list of commands, or more specific information like you're doing now.", &help },
 		{ "history", "Display recent (this session) terminal command history.", &history },
-		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", &shutdown },
-		{ "cls", "Clear the screen.", &cls }
+		{ "memview", "Display a screen of memory, starting at the specified location.", &memview },
+		{ "cls", "Clear the screen.", &cls },
+		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", &shutdown }
 	};
 
 char* input;
@@ -27,13 +29,15 @@ int prompt_x;
 int prompt_y;
 char* prompt_string;
 size_t prompt_string_length;
-char terminal_color;
 
 bool cursor;
 int cursor_x;
 int cursor_y;
 char cursor_char;
+
+char terminal_color;
 char cursor_color;
+char status_color;
 
 static volatile char* cursor_ptr;
 static bool endterm;
@@ -41,7 +45,7 @@ static bool endterm;
 void init_terminal()
 {
 	input = malloc(TERMINAL_INPUT_SIZE); //Allocate a block to act as a command buffer.
-	*input = '\0';
+	*input = 0x0;
 	input_ptr = 0;
 
 	terminal_color = get_color(TERMINAL_FG, TERMINAL_BG); // Set the terminal's default color.
@@ -58,9 +62,12 @@ void init_terminal()
 	cursor_y = prompt_y;
 	cursor_char = CURSOR_CHAR;
 	cursor_color = get_color(CURSOR_FG, CURSOR_BG);
+	
+	// And lastly, get the color for the terminal status bar.
+	status_color = get_color(STATUS_FG, STATUS_BG);
 }
 
-void start_terminal()
+void run_terminal()
 {
 	endterm = false;
 	
@@ -81,19 +88,15 @@ void start_terminal()
 		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
 		sync(); // And wait for vsync.
 	}
-	return;
 }
 
 static void handle_input()
 {
-	static char t = '\0';
-
-	t = poll_key(); // Get input, this really shouldn't be via polling.
+	char t = poll_key(); // Get input, this really shouldn't be via polling.
 	
 	if (t == '\n') // If t == newline (enter), parse input and clear buffer.
 	{
 		parse_input();
-		//TODO: Reset cursor and advance prompt to next empty line.
 		return;
 	}
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)
@@ -112,21 +115,24 @@ static void handle_input()
 				terminal_color);
 		}
 	}
-	else if (input_ptr < TERMINAL_INPUT_SIZE && t != '\0') // Otherwise handle text being added (assuming it's less than max input).
+	else if (input_ptr < TERMINAL_INPUT_SIZE && t != 0x0) // Otherwise handle text being added (assuming it's less than max input).
 	{
 		cursor_x++;
 		input[input_ptr] = t;
 		input_ptr++;
-		input[input_ptr] = '\0';
+		input[input_ptr] = 0x0;
 	}
 }
 
 static void parse_input()
 {
-	static struct command* cmdptr;
+	struct command* cmdptr;
 
-	if (input_ptr <= 0)						// TODO: Advance the cursor or something.
-		return;								// If there's nothing in the input buffer, nothing to parse.
+	if (input_ptr <= 0) // If there's nothing in the buffer, just advance to the next line.
+	{
+		new_prompt();
+		return;
+	}
 	
 	char cmd_string[TERMINAL_INPUT_SIZE];	// Char array to store the command in.
 	char params[TERMINAL_INPUT_SIZE];		// Char array to store the rest of the input buffer (parameters) in.
@@ -137,14 +143,20 @@ static void parse_input()
 	// Separate the input buffer to the first space.
 	//
 	
-	while(input[s] != ' ' || input[s] != 0x0) // Go till a space or null-terminator is encountered.
+	while(input[s] != ' ' && input[s] != 0x0) // Go till a space or null-terminator is encountered.
 	{
 		cmd_string[s] = input[s]; // Copy the string to the array.
 		s++;
 	}
 	
-	s++; // Advance s to the space after the first space.
-	cmd_string[s] = '\0'; // And also null-terminate the command string.
+	cmd_string[s + 1] = 0x0; // Null-terminate the command string.
+	
+	if (input[s] == 0x0)
+		goto parse; // If there are no parameters, just jump forward to the parsing.
+		
+	// Otherwise copy them to a separate array.
+	
+	s++; // First, advance s to the space after the first space.
 	
 	while(input[s] != 0x0) // Copy till null-terminator.
 	{
@@ -157,23 +169,41 @@ static void parse_input()
 	// Find a command with the same string.
 	//
 	
-	cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
+	parse: // Yeah yeah, dirty GOTOs.
+		cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
 		print( //TEMP
 			get_position(0, 0),
+			cmdptr->name,
+			terminal_color);
+		print( //ALSO TEMP
+			get_position(0, 1),
 			cmdptr->help,
 			terminal_color);
+		print( //EVEN MORE TEMP
+			get_position(0, 2),
+			&cmd_string[0],
+			terminal_color);
+		print( //THE TEMPEST
+			get_position(0, 3),
+			&params[0],
+			terminal_color);
+			
 		// If the command's found, transfer to the handler function.
 	}
 	else
 	{
+		print( //temp
+			get_position(0,0),
+			"NO COMMAND FOUND",
+			terminal_color);
 		// If not found, try looking for a file?
 		
 		// If neither works, print an error message and return to the terminal.
 	}
-	return;
+	new_prompt();
 }
 
 static void draw_cursor()
@@ -187,11 +217,27 @@ static void draw_cursor()
 	}
 }
 
+static void new_prompt()
+{
+	prompt_y++; //TODO: Replace this with something that detects how far the cursor has gone.
+	cursor_y = prompt_y;
+	cursor_x = prompt_string_length;
+	input_ptr = 0;
+	memset(input, 0x0, TERMINAL_INPUT_SIZE);
+}
+
 static struct command* find_cmd(char* input)
 {
 	int i;
 	for (i = 0; i < NUM_COMMANDS; i++)
 	{
+		printnum(
+			get_position(0, 10),
+			strcmp(commands[i].name, input),
+			terminal_color,
+			10);
+		flip();
+	
 		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
 			return &commands[i]; // If found, return a pointer to the commmand.
 	}
