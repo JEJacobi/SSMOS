@@ -16,6 +16,9 @@
 #define CURSOR_FG				LIGHT_GREEN
 #define CURSOR_BG				DARK_GREY
 
+#define STATUS_FG				WHITE
+#define STATUS_BG				BLUE
+
 void init_terminal();
 void start_terminal();
 void terminal_print(char* msg);
@@ -23,6 +26,7 @@ void terminal_print(char* msg);
 static void draw_cursor();
 static void handle_input();
 static void parse_input();
+static void new_prompt();
 
 static struct command* find_cmd(char* input);
 

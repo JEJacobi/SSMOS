@@ -1,4 +1,4 @@
-// Wrapper library for system calls.
+// User-space wrapper library for system calls.
 #ifndef LIB_SYSTEM
 #define LIB_SYSTEM
 

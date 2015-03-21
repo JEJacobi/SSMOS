@@ -37,8 +37,23 @@ int strcmp(const char *str1, const char *str2)
 	char* x1 = str1;
 	char* x2 = str2;
 	
+	while (*x1 != 0x0)
+	{
+		if (*x2 == 0x0)
+			return 1; // If str2 runs out before str1, str1 is greater.
+		if (*x2 > *x1)
+			return -1; // If str2 is greater than str1, return that.
+		if (*x1 > *x2)
+			return 1; // If str1 is greater than str2, return that.
+			
+		x1++; x2++; // Increment both.
+	}
 	
-	return 0;
+	if (*x2 != 0x0)
+		return -1; 	// Once str1 has ended, check str 2 for also ending. 
+					// If it hasn't, it's greater, so return -1.
+		
+	return 0; // If it still hasn't, both are exactly equal, so return 0.
 }
 
 void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offshoot thing.
@@ -51,12 +66,24 @@ void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offs
 
 void toupper(char *str)
 {
-	
+	while (*str != 0x0) // Go until null-terminator.
+	{
+		if (*str <= 122 && *str >= 97) // Lowercase ranges from 97-122.
+			*str -= 32; // The magic number to convert lower-case ASCII to upper-case ASCII.
+			
+		str++;
+	}
 }
 
 void tolower(char *str)
 {
-	
+	while (*str != 0x0) // Go until null-terminator.
+	{
+		if (*str <= 90 && *str >= 65) // Uppercase ranges from 65-90.
+			*str += 32; // Also the magic number for the other way around (but add it this time).
+			
+		str++;
+	}
 }
 
 int toint(char *str)

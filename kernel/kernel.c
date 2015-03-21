@@ -84,12 +84,19 @@ void kernel_main(int bdrive, int lomem, int himem)
 		DATA_BASE);
 		
 	flip();
-		
+	
+	// Initialize the terminal.
 	init_terminal();
-	start_terminal();
 	
-	//clear();
+	// And transfer to it. All userspace programs will run on this,
+	// so we'll only return on shutdown.
+	run_terminal();
 	
+	// On return from terminal, prepare the system for shutdown.
+	
+	// TODO: Stop any interrupts, close disk streams, etc.
+	
+	clear();
 	print( // Print a shutdown message on the last row.
 		get_position(0, ROWS - 1),
 		shtdown,
