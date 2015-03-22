@@ -14,6 +14,7 @@ struct command
 };
 
 #define NUM_COMMANDS		(sizeof commands / sizeof(struct command))
+#define SIG_SUCCESS			0
 
 // COMMAND HANDLERS 
 
@@ -34,7 +35,8 @@ int view(char* params);		// View a file in ASCII.
 int hexview(char* params);	// View a file's hexadecimal values.
 int memview(char* params);	// View the current memory at a certain location.
 
-int cls(char* params);	// Clear the screen.
+int cls(char* params);		// Clear the screen.
+int cprompt(char* params);	// Change the command prompt to what's entered.
 int shutdown(char* params);	// Shut down the computer.
 
 #endif

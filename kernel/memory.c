@@ -23,7 +23,7 @@ void *realloc(void *ptr, size_t newsz)
 
 void free(void *ptr)
 {
-	return NULL;
+	
 }
 
 void memcpy(void *dest, const void *src, size_t sz)
