@@ -39,8 +39,9 @@ char terminal_color;
 char cursor_color;
 char status_color;
 
+bool endterm;
+
 static volatile char* cursor_ptr;
-static bool endterm;
 
 void init_terminal()
 {
@@ -58,7 +59,7 @@ void init_terminal()
 	prompt_y = PROMPT_START_Y;
 	
 	cursor = true; // Setup the cursor.
-	cursor_x = prompt_string_length + 1;
+	cursor_x = prompt_string_length;
 	cursor_y = prompt_y;
 	cursor_char = CURSOR_CHAR;
 	cursor_color = get_color(CURSOR_FG, CURSOR_BG);
@@ -81,16 +82,20 @@ void run_terminal()
 			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
 			input,														// using the precalculated prompt_string_length.
 			terminal_color);
-			
-		draw_cursor(); // Followed by the cursor.
 		
 		flip(); // Flip the data onto video memory.
+		draw_cursor(); // Followed by the cursor.
 		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
 		sync(); // And wait for vsync.
 	}
 }
 
-static void handle_input()
+void terminal_write(char* msg)
+{
+	//TODO: Print *msg to the line and advance to next free line.
+}
+
+void handle_input()
 {
 	char t = poll_key(); // Get input, this really shouldn't be via polling.
 	
@@ -124,7 +129,7 @@ static void handle_input()
 	}
 }
 
-static void parse_input()
+void parse_input()
 {
 	struct command* cmdptr;
 
@@ -149,7 +154,7 @@ static void parse_input()
 		s++;
 	}
 	
-	cmd_string[s + 1] = 0x0; // Null-terminate the command string.
+	cmd_string[s] = 0x0; // Null-terminate the command string.
 	
 	if (input[s] == 0x0)
 		goto parse; // If there are no parameters, just jump forward to the parsing.
@@ -170,7 +175,7 @@ static void parse_input()
 	//
 	
 	parse: // Yeah yeah, dirty GOTOs.
-		cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
+	cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
@@ -206,7 +211,7 @@ static void parse_input()
 	new_prompt();
 }
 
-static void draw_cursor()
+void draw_cursor()
 {
 	if (cursor)
 	{
@@ -217,16 +222,23 @@ static void draw_cursor()
 	}
 }
 
-static void new_prompt()
+void new_prompt()
 {
 	prompt_y++; //TODO: Replace this with something that detects how far the cursor has gone.
+	
+	while (prompt_y > ROWS - 1)
+	{
+		scroll();
+		prompt_y--;
+	}
+	
 	cursor_y = prompt_y;
 	cursor_x = prompt_string_length;
 	input_ptr = 0;
 	memset(input, 0x0, TERMINAL_INPUT_SIZE);
 }
 
-static struct command* find_cmd(char* input)
+struct command* find_cmd(char* input)
 {
 	int i;
 	for (i = 0; i < NUM_COMMANDS; i++)

@@ -5,75 +5,86 @@
 
 int help(char* params)
 {
-	return 0;
+	// TODO: Write the contents of commands to the screen if there's no params, 
+	// and the detailed help for the command if there is.
+	return SIG_SUCCESS;
 }
 
 int history(char* params)
 {
-	return 0;
+	// TODO: Will need some kind of command storage.
+	return SIG_SUCCESS;
 }
 
 int list(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int find(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int edit(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int hexedit(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int makedir(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int copy(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int move(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int delete(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int view(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int hexview(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
 }
 
 int memview(char* params)
 {
-	return 0;
+	return SIG_SUCCESS;
+}
+
+int cprompt(char* params)
+{
+	return SIG_SUCCESS;
 }
 
 int cls(char* params)
 {
-	return 0;
+	//TODO: Clear the screen and reset the prompt/cursor.
+	return SIG_SUCCESS;
 }
 
 int shutdown(char* params)
 {
-	return 0;
+	extern bool endterm;
+	endterm = true;
+	return SIG_SUCCESS;
 }

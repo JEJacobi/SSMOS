@@ -21,13 +21,13 @@
 
 void init_terminal();
 void start_terminal();
-void terminal_print(char* msg);
 
-static void draw_cursor();
-static void handle_input();
-static void parse_input();
-static void new_prompt();
+void terminal_write(char* msg);
+void draw_cursor();
+void handle_input();
+void parse_input();
+void new_prompt();
 
-static struct command* find_cmd(char* input);
+struct command* find_cmd(char* input);
 
 #endif
