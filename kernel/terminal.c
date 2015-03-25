@@ -12,18 +12,6 @@
 #include "output.h"
 #include "string.h"
 
-struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
-	{
-		{ "help", "Get a list of commands, or more specific information like you're doing now.", &help },
-		{ "history", "Display recent (this session) terminal command history.", &history },
-		{ "memview", "Display a screen of memory, starting at the specified location.", &memview },
-		{ "cls", "Clear the screen.", &cls },
-		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", &shutdown }
-	};
-
-char* input;
-int input_ptr;
-
 bool prompt;
 int prompt_x;
 int prompt_y;
@@ -40,6 +28,9 @@ char cursor_color;
 char status_color;
 
 bool endterm;
+
+char* input;
+int input_ptr;
 
 static volatile char* cursor_ptr;
 
@@ -74,25 +65,12 @@ void run_terminal()
 	
 	while(!endterm)
 	{	
-		print( // Print the prompt first.
-			get_position(prompt_x, prompt_y),
-			prompt_string,
-			terminal_color);
-		print( // The input buffer second.
-			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
-			input,														// using the precalculated prompt_string_length.
-			terminal_color);
-		
+		draw_prompt();
 		flip(); // Flip the data onto video memory.
 		draw_cursor(); // Followed by the cursor.
 		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
 		sync(); // And wait for vsync.
 	}
-}
-
-void terminal_write(char* msg)
-{
-	//TODO: Print *msg to the line and advance to next free line.
 }
 
 void handle_input()
@@ -132,6 +110,7 @@ void handle_input()
 void parse_input()
 {
 	struct command* cmdptr;
+	int return_status;
 
 	if (input_ptr <= 0) // If there's nothing in the buffer, just advance to the next line.
 	{
@@ -179,24 +158,8 @@ void parse_input()
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
-		print( //TEMP
-			get_position(0, 0),
-			cmdptr->name,
-			terminal_color);
-		print( //ALSO TEMP
-			get_position(0, 1),
-			cmdptr->help,
-			terminal_color);
-		print( //EVEN MORE TEMP
-			get_position(0, 2),
-			&cmd_string[0],
-			terminal_color);
-		print( //THE TEMPEST
-			get_position(0, 3),
-			&params[0],
-			terminal_color);
-			
-		// If the command's found, transfer to the handler function.
+		return_status = cmdptr->call(params);
+		// If the command's found, transfer to the handler function (and get any return statuses).
 	}
 	else
 	{
@@ -208,7 +171,44 @@ void parse_input()
 		
 		// If neither works, print an error message and return to the terminal.
 	}
+
+}
+
+void writeline(char* msg)
+{
+	int i = 0;
+		
 	new_prompt();
+		
+	while (msg[i] != 0x0) // Go until a null terminator is reached.
+	{
+		putchar( // Print the characters.
+			get_position(i % COLUMNS, prompt_y),
+			msg[i],
+			terminal_color);
+		
+		if (i > 0 && i % (COLUMNS - 1) == 0)
+			new_prompt(); // Account for any newlines and update the prompt accordingly.
+			
+		i++;
+	}
+
+	new_prompt(); // And move to the next line.
+}
+
+void draw_prompt()
+{
+	if (prompt)
+	{
+		print( // Print the prompt string first.
+			get_position(prompt_x, prompt_y),
+			prompt_string,
+			terminal_color);
+		print( // The input buffer second.
+			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
+			input,														// using the precalculated prompt_string_length.
+			terminal_color);
+	}
 }
 
 void draw_cursor()
@@ -241,15 +241,8 @@ void new_prompt()
 struct command* find_cmd(char* input)
 {
 	int i;
-	for (i = 0; i < NUM_COMMANDS; i++)
+	for (i = 0; i < num_commands; i++)
 	{
-		printnum(
-			get_position(0, 10),
-			strcmp(commands[i].name, input),
-			terminal_color,
-			10);
-		flip();
-	
 		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
 			return &commands[i]; // If found, return a pointer to the commmand.
 	}

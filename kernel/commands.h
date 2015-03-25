@@ -13,7 +13,6 @@ struct command
 							these parameters. */
 };
 
-#define NUM_COMMANDS		(sizeof commands / sizeof(struct command))
 #define SIG_SUCCESS			0
 
 // COMMAND HANDLERS 
@@ -38,5 +37,10 @@ int memview(char* params);	// View the current memory at a certain location.
 int cls(char* params);		// Clear the screen.
 int cprompt(char* params);	// Change the command prompt to what's entered.
 int shutdown(char* params);	// Shut down the computer.
+
+// COMMAND LIST
+
+extern const struct command commands[];
+extern const int num_commands;
 
 #endif
