@@ -19,12 +19,6 @@
 #define STATUS_FG				WHITE
 #define STATUS_BG				BLUE
 
-// GLOBALS
-
-
-
-// FUNCTIONS
-
 void init_terminal();
 void start_terminal();
 
