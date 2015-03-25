@@ -19,13 +19,20 @@
 #define STATUS_FG				WHITE
 #define STATUS_BG				BLUE
 
+// GLOBALS
+
+
+
+// FUNCTIONS
+
 void init_terminal();
 void start_terminal();
 
-void terminal_write(char* msg);
+void writeline(char* msg);
 void draw_cursor();
 void handle_input();
 void parse_input();
+void draw_prompt();
 void new_prompt();
 
 struct command* find_cmd(char* input);

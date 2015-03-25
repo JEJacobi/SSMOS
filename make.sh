@@ -1,9 +1,9 @@
 #!/bin/sh\
 
 CC=i686-elf-gcc
-CFLAGS="-std=gnu99 -ffreestanding -Wall -Wextra -O2"
+CFLAGS="-std=gnu99 -ffreestanding -O2"
 LIB="-static -L../ -lssmos -I../lib"
-#-v
+#-Wall -Wextra -v
 
 # Clean up.
 ./clean.sh
