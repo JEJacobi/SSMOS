@@ -5,6 +5,7 @@ struct command
 {
 	char* name;				// The name and calling string of the command.
 	char* help;				// The help string of the command.
+	char* format;			// The format for any parameters.
 	int (*call)(char*);		// The function pointer to the command.
 	
 							/* All commands return an int as an error status, 

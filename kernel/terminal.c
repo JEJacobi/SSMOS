@@ -171,7 +171,7 @@ void parse_input()
 		
 		// If neither works, print an error message and return to the terminal.
 	}
-
+	new_prompt();
 }
 
 void writeline(char* msg)
@@ -186,14 +186,12 @@ void writeline(char* msg)
 			get_position(i % COLUMNS, prompt_y),
 			msg[i],
 			terminal_color);
-		
+			
 		if (i > 0 && i % (COLUMNS - 1) == 0)
 			new_prompt(); // Account for any newlines and update the prompt accordingly.
 			
 		i++;
 	}
-
-	new_prompt(); // And move to the next line.
 }
 
 void draw_prompt()
