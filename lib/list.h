@@ -21,4 +21,7 @@ void list_removeat			(struct element* list, int index);					// Remove an element
 void list_removelast		(struct element* list);								// Remove the last element.
 int list_count				(struct element* list);								// Get how many nodes are in the list.
 
+struct element* get_first	(struct element* list);								// Return a pointer to the first element.
+struct element* get_last	(struct element* list);								// Return a pointer to the last element.
+
 #endif
