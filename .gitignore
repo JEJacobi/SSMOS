@@ -36,3 +36,4 @@
 
 # Bochs dump:
 dump/
+kernel/date.h

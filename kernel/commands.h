@@ -48,7 +48,7 @@ int version(char* params);	// Get the current version of SSMOS and maybe the rel
 
 // COMMAND LIST
 
-extern const struct command commands[];
+extern struct command commands[];
 extern int num_commands;
 
 #endif

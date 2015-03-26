@@ -6,10 +6,11 @@
 #include "memory.h"
 #include "terminal.h"
 #include "graphics.h"
+#include "output.h"
 #include "string.h"
 #include "version.h"
 
-const struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
+struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
 		{ "help", "Get a list of commands, or more specific information like you're doing now.",
 		"help (x) - x: given command", &help },
@@ -25,6 +26,8 @@ const struct command commands[] = // List of built in command structs, their ID'
 		
 		{ "alias", "Aliases parameters as a command, however normal commands take precedence.",
 		"alias (x) (y) - x: alias name, y: command", &alias },
+		
+		{ "cprompt", "Changes the terminal prompt the string entered.", "cprompt (x) - x: new prompt", &cprompt },
 		
 		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
 		
@@ -50,7 +53,6 @@ struct command* find_cmd(char* input)
 
 int help(char* params)
 {
-	new_prompt();
 	if (params != NULL && params[0] != 0x0) // If there are parameters to deal with...
 	{
 		struct command* cmdptr = find_cmd(params);
@@ -146,6 +148,16 @@ int memview(char* params)
 
 int cprompt(char* params)
 {
+	extern char* prompt_string;
+	extern size_t prompt_string_length;
+	if (params != NULL && params[0] != 0x0)
+	{
+		// TODO: Dynamically allocate the prompt space, and make sure this doesn't cause an overflow.
+	}
+	else
+	{
+		writeline("Invalid prompt.");
+	}
 	return SIG_SUCCESS;
 }
 

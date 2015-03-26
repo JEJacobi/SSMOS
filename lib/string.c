@@ -6,7 +6,7 @@
 #include "system.h"
 //For memory allocation.
 
-size_t strlen(const char *str)
+size_t strlen(char *str)
 {
 	int len = 0;
 	while (*str != 0x0)
@@ -17,7 +17,7 @@ size_t strlen(const char *str)
 	return len;
 }
 
-void strcpy(char* dest, const char *src)
+void strcpy(char* dest, char *src)
 {
 	char* x = src;
 	char* y = dest;
@@ -30,7 +30,7 @@ void strcpy(char* dest, const char *src)
 	*y = 0x0; // And lastly, close out the destination string with a null-terminator.
 }
 
-char *strcat(char *dest, const char *src)
+char *strcat(char *dest, char *src)
 {
 	char* x = src;
 	char* y = dest;
@@ -48,12 +48,12 @@ char *strcat(char *dest, const char *src)
 	return dest;
 }
 
-char *strncat(char *dest, const char *src, size_t n)
+char *strncat(char *dest, char *src, size_t n)
 {
 	return NULL;
 }
 
-int strcmp(const char *str1, const char *str2)
+int strcmp(char *str1, char *str2)
 {
 	char* x = str1;
 	char* y = str2;
