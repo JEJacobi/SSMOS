@@ -19,12 +19,33 @@ size_t strlen(const char *str)
 
 void strcpy(char* dest, const char *src)
 {
+	char* x = src;
+	char* y = dest;
 	
+	while (*x != 0x0) // Copy until null-terminator, as usual.
+	{
+		*y = *x; 	// Copy a character.
+		x++; y++;	// And increment to the next one.
+	}
+	*y = 0x0; // And lastly, close out the destination string with a null-terminator.
 }
 
 char *strcat(char *dest, const char *src)
 {
-	return NULL;
+	char* x = src;
+	char* y = dest;
+	
+	while (x != 0x0)
+		x++; // Set X to the null-terminator of the destination string, as an offset to copy to.
+	
+	while (y != 0x0)
+	{
+		*x = *y; // Copy each character of y to the destination offset.
+		x++; y++; // And increment both.
+	}
+	
+	*x = 0x0; // Lastly again, null-terminate *dest.
+	return dest;
 }
 
 char *strncat(char *dest, const char *src, size_t n)
@@ -34,22 +55,22 @@ char *strncat(char *dest, const char *src, size_t n)
 
 int strcmp(const char *str1, const char *str2)
 {
-	char* x1 = str1;
-	char* x2 = str2;
+	char* x = str1;
+	char* y = str2;
 	
-	while (*x1 != 0x0)
+	while (*x != 0x0)
 	{
-		if (*x2 == 0x0)
+		if (*y == 0x0)
 			return 1; // If str2 runs out before str1, str1 is greater.
-		if (*x2 > *x1)
+		if (*y > *x)
 			return -1; // If str2 is greater than str1, return that.
-		if (*x1 > *x2)
+		if (*x > *y)
 			return 1; // If str1 is greater than str2, return that.
 			
-		x1++; x2++; // Increment both.
+		x++; y++; // Increment both.
 	}
 	
-	if (*x2 != 0x0)
+	if (*y != 0x0)
 		return -1; 	// Once str1 has ended, check str 2 for also ending. 
 					// If it hasn't, it's greater, so return -1.
 		

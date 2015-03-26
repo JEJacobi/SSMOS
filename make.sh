@@ -1,5 +1,10 @@
 #!/bin/sh\
 
+# Define the compile date:
+echo -n "#define COMPILE_DATE \"Compiled on: " > kernel/date.h
+echo -n `date` >> kernel/date.h
+echo -n "\"" >> kernel/date.h
+
 CC=i686-elf-gcc
 CFLAGS="-std=gnu99 -ffreestanding -O2"
 LIB="-static -L../ -lssmos -I../lib"

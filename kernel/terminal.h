@@ -29,6 +29,4 @@ void parse_input();
 void draw_prompt();
 void new_prompt();
 
-struct command* find_cmd(char* input);
-
 #endif
