@@ -2,41 +2,69 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "date.h"
+#include "memory.h"
 #include "terminal.h"
 #include "graphics.h"
+#include "string.h"
+#include "version.h"
 
 const struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
 		{ "help", "Get a list of commands, or more specific information like you're doing now.",
 		"help (x) - x: given command", &help },
 		
-		{ "history", "Display recent (this session) terminal command history.", "history - no parameters", &history },
+		{ "history", "Display recent terminal command history.", "history - no parameters", &history },
 		
 		{ "memview", "Display a screen of memory, starting at the specified location.", 
 		"memview (x) - x: starting location", &memview },
 		
-		{ "cls", "Clear the screen.", "cls - no parameters", &cls },
+		{ "cls", "Clears the screen.", "cls - no parameters", &cls },
 		
-		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown }
+		{ "tcolor", "Changes the text and screen color. Valid colors are: Black, Blue, Cyan, Green,  Magenta, Brown, and White.", "tcolor (x) (y) - x: foreground, y: background", &tcolor },
+		
+		{ "alias", "Aliases parameters as a command, however normal commands take precedence.",
+		"alias (x) (y) - x: alias name, y: command", &alias },
+		
+		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
+		
+		{ "about", "The SSMOS about page.", "about - no parameters", &about },
+		
+		{ "version", "Displays the current version of SSMOS.", "version - no parameters", &version }
 	};
 	
-const int num_commands = (sizeof commands / sizeof(struct command));
+int num_commands = (sizeof commands / sizeof(struct command));
+
+struct command* find_cmd(char* input)
+{
+	int i;
+	for (i = 0; i < num_commands; i++)
+	{
+		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
+			return &commands[i]; // If found, return a pointer to the commmand.
+	}
+	return NULL; // If none are found, return NULL.
+}
+
+// COMMAND HANDLERS:
 
 int help(char* params)
 {
-	if (params != NULL && params[0] != 0x0)
+	new_prompt();
+	if (params != NULL && params[0] != 0x0) // If there are parameters to deal with...
 	{
 		struct command* cmdptr = find_cmd(params);
-		if (cmdptr != NULL)
+		if (cmdptr != NULL) // Try to find a command matching them.
 		{
 			writeline("");
 			writeline(cmdptr->format);
 			writeline("");
 			writeline(cmdptr->help);
 		}
-		else
+		else // If not, print an error message.
 		{
-			writeline("Cannot find command: "); // TODO: Append params to this, will need strcat working.
+			writeline("Cannot find command:");
+			writeline(params);
 		}
 	}
 	else
@@ -51,15 +79,13 @@ int help(char* params)
 		for (i = 0; i < num_commands; i++) // Iterate through the command list.
 			writeline(commands[i].name);
 	}
+	new_prompt();
 	return SIG_SUCCESS;
 }
 
 int history(char* params)
 {
 	// TODO: Will need some kind of command storage.
-	
-	// Maybe linked list of char*'s to store commands in?
-	// Static arrays would be very inefficient due to the max command size.
 	return SIG_SUCCESS;
 }
 
@@ -134,9 +160,36 @@ int cls(char* params)
 	return SIG_SUCCESS; // And report success.
 }
 
+int tcolor(char* params)
+{
+	return SIG_SUCCESS;
+}
+
+int alias(char* params)
+{
+	return SIG_SUCCESS;
+}
+
 int shutdown(char* params)
 {
 	extern bool endterm;
 	endterm = true;
+	return SIG_SUCCESS;
+}
+
+int about(char* params)
+{
+	writeline("SSMOS - the S**** Self Made Operating System");
+	writeline("");
+	writeline(VERSION);
+	writeline(COMPILE_DATE);
+	writeline("");
+	writeline("Thanks to OSDev.org for the fantastic resources.");
+	return SIG_SUCCESS;
+}
+
+int version(char* params)
+{
+	writeline(VERSION);
 	return SIG_SUCCESS;
 }

@@ -16,6 +16,8 @@ struct command
 
 #define SIG_SUCCESS			0
 
+struct command* find_cmd(char* input);
+
 // COMMAND HANDLERS 
 
 int help(char* params);		// Display help strings and list functions.
@@ -36,12 +38,17 @@ int hexview(char* params);	// View a file's hexadecimal values.
 int memview(char* params);	// View the current memory at a certain location.
 
 int cls(char* params);		// Clear the screen.
+int tcolor(char* params);	// Sets the terminal's color and refreshes the screen.
+int alias(char* params);	// Alias a string as a command.
 int cprompt(char* params);	// Change the command prompt to what's entered.
 int shutdown(char* params);	// Shut down the computer.
+
+int about(char* params);	// About SSMOS.
+int version(char* params);	// Get the current version of SSMOS and maybe the release date.
 
 // COMMAND LIST
 
 extern const struct command commands[];
-extern const int num_commands;
+extern int num_commands;
 
 #endif

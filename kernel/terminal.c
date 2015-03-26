@@ -118,8 +118,8 @@ void parse_input()
 		return;
 	}
 	
-	char cmd_string[TERMINAL_INPUT_SIZE];	// Char array to store the command in.
-	char params[TERMINAL_INPUT_SIZE];		// Char array to store the rest of the input buffer (parameters) in.
+	char* cmd_string = malloc(TERMINAL_INPUT_SIZE);	// Char array to store the command in.
+	char* params = malloc(TERMINAL_INPUT_SIZE);		// Char array to store the rest of the input buffer (parameters) in.
 	int s = 0;
 	int s_params = 0;
 	
@@ -154,7 +154,7 @@ void parse_input()
 	//
 	
 	parse: // Yeah yeah, dirty GOTOs.
-	cmdptr = find_cmd(&cmd_string[0]); 	// Find a command with the command string gotten earlier.
+	cmdptr = find_cmd(cmd_string); 	// Find a command with the command string gotten earlier.
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
@@ -163,15 +163,17 @@ void parse_input()
 	}
 	else
 	{
-		print( //temp
-			get_position(0,0),
-			"NO COMMAND FOUND",
-			terminal_color);
+		writeline("Cannot find file or command:");
+		writeline(cmd_string);
 		// If not found, try looking for a file?
 		
 		// If neither works, print an error message and return to the terminal.
 	}
-	new_prompt();
+	
+	// TODO: Add pointers to the allocated buffers: cmd_string and params.
+	// A linked list of these would function as a history system.
+	
+	new_prompt(); // And new prompt.
 }
 
 void writeline(char* msg)
@@ -234,15 +236,4 @@ void new_prompt()
 	cursor_x = prompt_string_length;
 	input_ptr = 0;
 	memset(input, 0x0, TERMINAL_INPUT_SIZE);
-}
-
-struct command* find_cmd(char* input)
-{
-	int i;
-	for (i = 0; i < num_commands; i++)
-	{
-		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
-			return &commands[i]; // If found, return a pointer to the commmand.
-	}
-	return NULL; // If none are found, return NULL.
 }
