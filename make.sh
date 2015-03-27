@@ -1,5 +1,8 @@
 #!/bin/sh\
 
+mkdir obj
+mkdir lib/obj
+
 # Define the compile date:
 echo -n "#define COMPILE_DATE \"Compiled on: " > kernel/date.h
 echo -n `date` >> kernel/date.h
@@ -11,7 +14,7 @@ LIB="-static -L../ -lssmos -I../lib"
 #-Wall -Wextra -v
 
 # Clean up.
-./clean.sh
+#./clean.sh
 
 # Compile the system library first.
 cd lib/obj
