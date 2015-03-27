@@ -1,5 +1,8 @@
 #!/bin/sh\
 
+rm ssmos.bin
+rm libssmos.a
+
 mkdir obj
 mkdir lib/obj
 
@@ -13,15 +16,14 @@ CFLAGS="-std=gnu99 -ffreestanding -O2"
 LIB="-static -L../ -lssmos -I../lib"
 #-Wall -Wextra -v
 
-# Clean up.
-#./clean.sh
-
 # Compile the system library first.
 cd lib/obj
+rm *
 $CC -c ../*.c  $CFLAGS
 ar rvs ../../libssmos.a *.o
 
 cd ../../obj
+rm *
 
 # Next, the bootloader with nasm.
 nasm -felf32 ../boot/boot.asm -o boot.bin
