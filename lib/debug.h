@@ -1,3 +1,5 @@
+// Functions for general debugging and error handling.
+
 #ifndef LIB_DEBUG
 #define LIB_DEBUG
 

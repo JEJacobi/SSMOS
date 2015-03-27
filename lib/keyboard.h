@@ -1,3 +1,5 @@
+// Keyboard driver.
+
 #ifndef LIB_KEYBOARD
 #define LIB_KEYBOARD
 

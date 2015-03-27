@@ -1,3 +1,5 @@
+// Heap memory system, malloc() and the like.
+
 #ifndef KERNEL_MEMORY
 #define KERNEL_MEMORY
 

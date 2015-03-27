@@ -1,3 +1,5 @@
+// Standard library for basic array functions.
+
 #ifndef LIB_ARRAY
 #define LIB_ARRAY
 #include <stddef.h>

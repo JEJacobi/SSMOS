@@ -18,12 +18,13 @@ void *malloc(size_t size)
 
 void *realloc(void *ptr, size_t newsz)
 {
+	// TODO: Will need memory headers working to find out how much to copy to the new block.
 	return NULL;
 }
 
 void free(void *ptr)
 {
-	
+	// TODO: Memory headers again.
 }
 
 void memcpy(void *dest, const void *src, size_t sz)

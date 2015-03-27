@@ -1,3 +1,5 @@
+// Reasonably basic VGA-textmode graphics driver.
+
 #ifndef KERNEL_GRAPHICS
 #define KERNEL_GRAPHICS
 

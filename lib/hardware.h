@@ -1,4 +1,7 @@
+// Functions for direct I/O with hardware.
+
 // Blatantly stolen from an assembly toolkit on osdev.org.
+
 #ifndef LIB_SERIAL
 #define LIB_SERIAL
 
