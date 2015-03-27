@@ -1,3 +1,5 @@
+// Commands, definitions, and handlers for the terminal.
+
 #ifndef KERNEL_COMMANDS
 #define KERNEL_COMMANDS
 

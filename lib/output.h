@@ -1,3 +1,5 @@
+// Standard library graphical definitions.
+
 #ifndef LIB_GRAPHICS
 #define LIB_GRAPHICS
 #include <math.h>
@@ -37,7 +39,7 @@ inline int get_position(int x, int y)	// Get the combined position to write to.
 	return val;
 }
 
-inline char get_color(enum color fg, enum color bg)	//Get the formatted combined color for VGA text mode.
+inline char get_color(enum color fg, enum color bg)			//Get the formatted combined color for VGA text mode.
 {
 	return fg | bg << 4;
 }

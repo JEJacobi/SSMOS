@@ -1,3 +1,5 @@
+// Built-in kernel CLI.
+
 #ifndef KERNEL_TERMINAL
 #define KERNEL_TERMINAL
 

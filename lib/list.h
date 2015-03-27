@@ -1,3 +1,5 @@
+// Standard library for a basic linked list.
+
 #ifndef LIB_LIST
 #define LIB_LIST
 #include <stddef.h>

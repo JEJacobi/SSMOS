@@ -7,9 +7,9 @@
 #include "string.h"
 #include "output.h"
 
-#define FRAMEBUFFER_SIZE		0xFA0								// The size of the framebuffer (columns * rows * 2 bytes)
-#define MEM_END					framebuffer + (COLUMNS * ROWS * 2) 	// The pointer to the end of video memory.
-#define NUM_PRINT_SIZE			12									// The buffer size for printing numbers.
+#define FRAMEBUFFER_SIZE		(COLUMNS * ROWS * 2)			// The size of the framebuffer (columns * rows * 2 bytes)
+#define MEM_END					framebuffer + FRAMEBUFFER_SIZE 	// The pointer to the end of video memory.
+#define NUM_PRINT_SIZE			12								// The buffer size for printing numbers.
 
 static volatile char *vidptr;
 static char *numbuffer;
@@ -80,7 +80,29 @@ void putchar(int pos, char c, char color)
 void putstring(int pos, char *text, int c, char color)
 {
 	set_vidptr(pos);
-	//TODO: Make sure nothing gets written outside video memory.
+	
+	int i;
+	
+	for (i = 0; i < c; i++)
+	{
+		if (text[i] != '\n')
+		{
+			*vidptr = text[i]; 		// Write the character.
+			vidptr++; 				// Increment to the color byte.
+			*vidptr = color; 		// Write the color.
+			vidptr++; 				// Increment for the next cycle.
+		}
+		else
+		{
+			handle_newline();
+		}
+	
+		if (text[i] == 0x0)
+			return; // If the string has run out before the characters, return.
+	
+		if (vidptr >= MEM_END)
+			return; // If the vidptr is past the bounds of the video memory, stop printing and return.
+	}
 }
 
 void print(int pos, char *text, char color)
@@ -91,14 +113,12 @@ void print(int pos, char *text, char color)
 	
 	while (text[i] != 0x0) // Write until a null terminator is reached.
 	{
-		//TODO: Check for vidptr exceeding video memory.
-		
 		if (text[i] != '\n') //if the character is not a newline
 		{
-			*vidptr = text[i]; // Write the character.
-			vidptr++; // Increment to the color byte.
-			*vidptr = color; // Write the color.
-			vidptr++; // Increment for the next cycle.
+			*vidptr = text[i]; 		// Write the character.
+			vidptr++; 				// Increment to the color byte.
+			*vidptr = color; 		// Write the color.
+			vidptr++; 				// Increment for the next cycle.
 		}
 		else
 		{
@@ -107,7 +127,6 @@ void print(int pos, char *text, char color)
 		
 		if (vidptr >= MEM_END)
 			return; // If the vidptr is past the bounds of the video memory, stop printing and return.
-			//TODO: Support scrolling?
 		
 		i++; // And increment the written counter.
 	}
