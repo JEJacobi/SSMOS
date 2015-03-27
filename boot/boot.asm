@@ -141,7 +141,7 @@ MINMEM: equ 0x1E0			; The minimum memory needed for the kernel to load and execu
 BOOTLOADER equ 0x7C00		; Location of the bootloader, usually 0x7C00.
 SECONDSTAGE equ 0x7E00		; Location of the second stage bootloader, one sector after 1st stage (usually 0x7E00).
 KERNEL_LOCATION equ 0x8000	; Location of the kernel, probably around 0x8000.
-SECTORS equ 0x20			; How many sectors to read from the disk into kernelspace.
+SECTORS equ 0x40			; How many sectors to read from the disk into kernelspace.
 MAX_ATTEMPTS equ 0x5		; How many tries to read the disk.
 LOWSTACK equ 0x7c00			; Location of the real mode stack.
 HIGHSTACK equ 0x00007c00	; Location of the PM stack.
