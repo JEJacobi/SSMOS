@@ -19,26 +19,26 @@ size_t strlen(char *str)
 
 void strcpy(char* dest, char *src)
 {
-	char* x = src;
-	char* y = dest;
+	char* x = dest;
+	char* y = src;
 	
-	while (*x != 0x0) // Copy until null-terminator, as usual.
+	while (*y != 0x0) // Copy until null-terminator, as usual.
 	{
-		*y = *x; 	// Copy a character.
+		*x = *y; 	// Copy a character.
 		x++; y++;	// And increment to the next one.
 	}
-	*y = 0x0; // And lastly, close out the destination string with a null-terminator.
+	*x = 0x0; // And lastly, close out the destination string with a null-terminator.
 }
 
 char *strcat(char *dest, char *src)
 {
-	char* x = src;
-	char* y = dest;
+	char* x = dest;
+	char* y = src;
 	
-	while (x != 0x0)
-		x++; // Set X to the null-terminator of the destination string, as an offset to copy to.
+	while (*x != 0x0)
+		x++; // Set x to the null-terminator of the destination string, as an offset to copy to.
 	
-	while (y != 0x0)
+	while (*y != 0x0)
 	{
 		*x = *y; // Copy each character of y to the destination offset.
 		x++; y++; // And increment both.
@@ -50,7 +50,22 @@ char *strcat(char *dest, char *src)
 
 char *strncat(char *dest, char *src, size_t n)
 {
-	return NULL;
+	int i;
+	char* x = dest;
+	char* y = src;
+	
+	while (*x != 0x0)
+		x++; // Offset X, same as strcat.
+		
+	for (i = 0; i < n; i++)
+	{
+		if (*y == 0x0) // If there's nothing left to copy, return.
+			return dest;
+	
+		*x = *y; // Copy and increment the pointers.
+		x++; y++;
+	}
+	return dest;
 }
 
 int strcmp(char *str1, char *str2)

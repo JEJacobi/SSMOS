@@ -65,8 +65,12 @@ int help(char* params)
 		}
 		else // If not, print an error message.
 		{
-			writeline("Cannot find command:");
-			writeline(params);
+			char* errmsg = "Cannot find command: ";
+			char* error = malloc(sizeof(errmsg) + TERMINAL_INPUT_SIZE);
+			strcpy(error, errmsg);
+			strcat(error, params);
+			writeline(error); // Fancy way of printing a message and what was entered.
+			free(error);
 		}
 	}
 	else
