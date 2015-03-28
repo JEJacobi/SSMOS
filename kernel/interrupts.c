@@ -7,6 +7,21 @@
 
 struct idt_entry idt[IDT_SIZE];
 
+void init_interrupts()
+{
+	add_interrupt(0, 0xDEADBEEF, 0, 0); // TEMP TEST
+}
+
+void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
+{
+	idt[num].selector = selector; // Copy over the direct values.
+	idt[num].zero = 0;
+	idt[num].attributes = flags;
+	
+	idt[num].offset_1 = base & 0xFFFF; // And split the base with some fancy bitwising.
+	idt[num].offset_2 = (base >> 16) & 0xFFFF;
+}
+
 bool check_interrupts_enabled()
 {
 	unsigned long flags;
