@@ -31,5 +31,9 @@ nasm -felf32 ../boot/boot.asm -o boot.bin
 # Finally, the kernel.
 $CC -c  ../kernel/*.c -I. $CFLAGS $LIB
 
+# Including any assembly files.
+nasm -felf32 ../kernel/isr.asm
+mv ../kernel/*.o .
+
 # And glue it all together.
 $CC -o ../ssmos.bin boot.bin *.o -ffreestanding -Ttext 0x7C00 -Wl,--oformat=binary -nostdlib -lgcc -O2 -I../kernel $LIB

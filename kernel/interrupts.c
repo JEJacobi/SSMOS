@@ -18,8 +18,11 @@ void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
 	idt[num].zero = 0;
 	idt[num].attributes = flags;
 	
-	idt[num].offset_1 = base & 0xFFFF; // And split the base with some fancy bitwising.
-	idt[num].offset_2 = (base >> 16) & 0xFFFF;
+	idt[num].offset_2 = base & 0xFFFF; // And split the base with some fancy bitwising.
+	idt[num].offset_1 = (base >> 16) & 0xFFFF;
+	
+	idt[num + 1].offset_1 = 0xDEAD;
+	idt[num + 1].offset_2 = 0xBEEF;
 }
 
 bool check_interrupts_enabled()
