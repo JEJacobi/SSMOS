@@ -32,7 +32,7 @@ nasm -felf32 ../boot/boot.asm -o boot.bin
 $CC -c  ../kernel/*.c -I. $CFLAGS $LIB
 
 # Including any assembly files.
-nasm -felf32 ../kernel/isr.asm
+nasm -felf32 ../kernel/*.asm
 mv ../kernel/*.o .
 
 # And glue it all together.

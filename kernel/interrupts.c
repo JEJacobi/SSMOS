@@ -3,13 +3,35 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+
 #include "hardware.h"
+
+#include "graphics.h"
+#include "output.h"
 
 struct idt_entry idt[IDT_SIZE];
 
 void init_interrupts()
 {
-	add_interrupt(0, 0xDEADBEEF, 0, 0); // TEMP TEST
+	extern void* interrupt_handler_0x0;
+	add_interrupt(0, &interrupt_handler_0x0, KERNEL_SELECTOR, INTERRUPT_GATE);
+	
+	// TEST
+	printnum(
+		get_position(0,0),
+		idt[0].offset_1,
+		get_color(LIGHT_GREEN, BLACK),
+		16);
+	printnum(
+		get_position(0,1),
+		idt[0].offset_2,
+		get_color(LIGHT_GREEN, BLACK),
+		16);
+	printnum(
+		get_position(0,2),
+		&interrupt_handler_0x0,
+		get_color(LIGHT_GREEN, BLACK),
+		16);
 }
 
 void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
@@ -20,9 +42,6 @@ void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
 	
 	idt[num].offset_2 = base & 0xFFFF; // And split the base with some fancy bitwising.
 	idt[num].offset_1 = (base >> 16) & 0xFFFF;
-	
-	idt[num + 1].offset_1 = 0xDEAD;
-	idt[num + 1].offset_2 = 0xBEEF;
 }
 
 bool check_interrupts_enabled()
@@ -45,4 +64,13 @@ void load_idt(void* base, uint16_t size)
     idt_ptr.length 	= size;
     idt_ptr.base 	= (uint32_t)base;
     asm volatile ("lidt (%0)" : : "r"(&idt_ptr)); // Another bit of assembly stolen from osdev.
+}
+
+void interrupt_handler()
+{
+	print(
+		get_position(0, 0),
+		"INTERRUPT!",
+		get_color(LIGHT_GREEN, BLACK));
+	flip();
 }
