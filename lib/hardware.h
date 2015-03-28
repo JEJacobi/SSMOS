@@ -5,6 +5,10 @@
 #ifndef LIB_SERIAL
 #define LIB_SERIAL
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 //
 //	Check if a certain bit is toggled.
 //
@@ -30,5 +34,4 @@ inline void outb(int port, char val)
 {
 	asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));	
 }
-
 #endif

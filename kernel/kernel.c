@@ -11,6 +11,7 @@
 #include "math.h"
 #include "memory.h"
 #include "graphics.h"
+#include "interrupts.h"
 #include "terminal.h"
 #include "output.h"
 
