@@ -27,7 +27,7 @@ void clear()
 {
 	for( //Clear the video memory, color presets as well.
 		vidptr = (volatile char*)framebuffer; 
-		vidptr < MEM_END;
+		vidptr < (volatile char*)MEM_END;
 		vidptr++)
 	{
 		*vidptr = 0x0; //Just overwrite everything with NULs.
@@ -100,7 +100,7 @@ void putstring(int pos, char *text, int c, char color)
 		if (text[i] == 0x0)
 			return; // If the string has run out before the characters, return.
 	
-		if (vidptr >= MEM_END)
+		if (vidptr >= (volatile char*)MEM_END)
 			return; // If the vidptr is past the bounds of the video memory, stop printing and return.
 	}
 }
@@ -125,7 +125,7 @@ void print(int pos, char *text, char color)
 			handle_newline();
 		}
 		
-		if (vidptr >= MEM_END)
+		if (vidptr >= (volatile char*)MEM_END)
 			return; // If the vidptr is past the bounds of the video memory, stop printing and return.
 		
 		i++; // And increment the written counter.

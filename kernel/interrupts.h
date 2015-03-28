@@ -40,6 +40,11 @@ extern struct idt_entry idt[];
 inline void disable_interrupts() 	{ asm volatile ("cli"); } // Disable interrupts via assembly.
 inline void enable_interrupts()		{ asm volatile ("sti"); } // Enable interrupts via assembly.
 
+void init_interrupts();						// Initialize the IDT and PIC.
+void add_interrupt(	uint8_t num,			// Add and format an interrupt into the IDT.
+					uint32_t base,
+					uint16_t selector,
+					uint8_t flags);
 bool check_interrupts_enabled(); 			// Check that interrupts are enabled.
 void load_idt(void* base, uint16_t size); 	// Wrapper for loading an IDT.
 

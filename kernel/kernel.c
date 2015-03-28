@@ -42,7 +42,8 @@ char *msgs = 	" Booting from drive number   :\n"
 char *shtdown =	" It is now safe to turn off the computer.                                       ";
 
 void kernel_main(int bdrive, int lomem, int himem)
-{	
+{
+	init_interrupts();
 	memory_init(himem); //Initialize the heap and memory handlers.
 	graphics_init(); 	//Initialize the display stuff.
 	clear();
@@ -95,7 +96,8 @@ void kernel_main(int bdrive, int lomem, int himem)
 	
 	// On return from terminal, prepare the system for shutdown.
 	
-	// TODO: Stop any interrupts, close disk streams, etc.
+	disable_interrupts(); // Stop any interrupts.
+	
 	print( // Print a shutdown message on the last row.
 		get_position(0, ROWS - 1),
 		shtdown,
