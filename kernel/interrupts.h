@@ -25,6 +25,8 @@
 
 #define IDT_SIZE		256
 
+#define KERNEL_SELECTOR	0x8
+
 struct idt_entry
 {
 	uint16_t	offset_1;	// Lower part of the handler's address.
@@ -47,5 +49,7 @@ void add_interrupt(	uint8_t num,			// Add and format an interrupt into the IDT.
 					uint8_t flags);
 bool check_interrupts_enabled(); 			// Check that interrupts are enabled.
 void load_idt(void* base, uint16_t size); 	// Wrapper for loading an IDT.
+
+void interrupt_handler();
 
 #endif
