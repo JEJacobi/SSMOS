@@ -11,12 +11,15 @@
 
 struct idt_entry idt[IDT_SIZE];
 
-void init_interrupts()
+void interrupts_init()
 {
-	extern void* interrupt_handler_0x0;
-	add_interrupt(0, &interrupt_handler_0x0, KERNEL_SELECTOR, INTERRUPT_GATE);
+	extern void* interrupt_handler_0x0; // Temp, but eventually will be divide by zero.
+	add_interrupt(0, (int)(&interrupt_handler_0x0), KERNEL_SELECTOR, INTERRUPT_GATE);
 	
-	// TEST
+	extern void* interrupt_handler_0xD;
+	add_interrupt(13, (int)(&interrupt_handler_0xD), KERNEL_SELECTOR, INTERRUPT_GATE);
+	
+	/* TEST
 	printnum(
 		get_position(0,0),
 		idt[0].offset_1,
@@ -31,7 +34,15 @@ void init_interrupts()
 		get_position(0,2),
 		&interrupt_handler_0x0,
 		get_color(LIGHT_GREEN, BLACK),
-		16);
+		16); */
+	
+	// Finally, load the IDT with the calculated size and address of the first handler.
+	load_idt(&idt[0], (sizeof (struct idt_entry) * IDT_SIZE) - 1);
+	asm volatile ("xchgw %bx, %bx");
+	
+	//asm volatile ("int $0");//temp
+	
+	enable_interrupts(); // And turn them back on after the bootloader disable.
 }
 
 void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
@@ -40,8 +51,8 @@ void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
 	idt[num].zero = 0;
 	idt[num].attributes = flags;
 	
-	idt[num].offset_2 = base & 0xFFFF; // And split the base with some fancy bitwising.
-	idt[num].offset_1 = (base >> 16) & 0xFFFF;
+	idt[num].offset_1 = base & 0xFFFF; // And split the base with some fancy bitwising.
+	idt[num].offset_2 = (base >> 16) & 0xFFFF;
 }
 
 bool check_interrupts_enabled()
@@ -60,10 +71,10 @@ void load_idt(void* base, uint16_t size)
         uint16_t length;
         uint32_t base;
     } __attribute__((packed)) idt_ptr;
- 
+	
     idt_ptr.length 	= size;
     idt_ptr.base 	= (uint32_t)base;
-    asm volatile ("lidt (%0)" : : "r"(&idt_ptr)); // Another bit of assembly stolen from osdev.
+    asm volatile (); // Another bit of assembly stolen from osdev.
 }
 
 void interrupt_handler()
@@ -73,4 +84,5 @@ void interrupt_handler()
 		"INTERRUPT!",
 		get_color(LIGHT_GREEN, BLACK));
 	flip();
+	while (true) { }
 }
