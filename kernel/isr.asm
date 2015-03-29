@@ -55,3 +55,10 @@ with_error	0xC
 with_error	0xD
 with_error	0xE
 no_error	0xF
+
+; Function for loading the IDT given the idtptr in interrupts.c
+global load_idt
+extern idtptr
+load_idt:
+	lidt [idtptr]
+	ret

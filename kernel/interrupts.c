@@ -8,40 +8,30 @@
 
 #include "graphics.h"
 #include "output.h"
+#include "terminal.h"
 
 struct idt_entry idt[IDT_SIZE];
+struct idt_ptr idtptr;
+
+extern void load_idt();
 
 void interrupts_init()
 {
+	// Set up the IDT pointer.
+	idtptr.limit = (sizeof (struct idt_entry) * IDT_SIZE) - 1;
+    idtptr.base = (unsigned int)(&idt[0]);
+
+	// Add the interrupts:
+	
 	extern void* interrupt_handler_0x0; // Temp, but eventually will be divide by zero.
 	add_interrupt(0, (int)(&interrupt_handler_0x0), KERNEL_SELECTOR, INTERRUPT_GATE);
 	
 	extern void* interrupt_handler_0xD;
 	add_interrupt(13, (int)(&interrupt_handler_0xD), KERNEL_SELECTOR, INTERRUPT_GATE);
 	
-	/* TEST
-	printnum(
-		get_position(0,0),
-		idt[0].offset_1,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	printnum(
-		get_position(0,1),
-		idt[0].offset_2,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	printnum(
-		get_position(0,2),
-		&interrupt_handler_0x0,
-		get_color(LIGHT_GREEN, BLACK),
-		16); */
+	asm volatile ("xchgw %bx, %bx"); // TEMP BREAKPOINT
 	
-	// Finally, load the IDT with the calculated size and address of the first handler.
-	load_idt(&idt[0], (sizeof (struct idt_entry) * IDT_SIZE) - 1);
-	asm volatile ("xchgw %bx, %bx");
-	
-	//asm volatile ("int $0");//temp
-	
+	load_idt(); // Finally, load the IDT with the calculated size and address of the first handler.
 	enable_interrupts(); // And turn them back on after the bootloader disable.
 }
 
@@ -64,25 +54,13 @@ bool check_interrupts_enabled()
     return flags & (1 << 9);
 }
 
-void load_idt(void* base, uint16_t size)
-{
-    struct // Interrupt Descriptor Table pointer struct. Only needed by this function.
-    {
-        uint16_t length;
-        uint32_t base;
-    } __attribute__((packed)) idt_ptr;
-	
-    idt_ptr.length 	= size;
-    idt_ptr.base 	= (uint32_t)base;
-    asm volatile (); // Another bit of assembly stolen from osdev.
-}
-
 void interrupt_handler()
 {
+	// TEMP
+	static int i = 0;
 	print(
-		get_position(0, 0),
-		"INTERRUPT!",
+		get_position(0, i),
+		"INTERRUPT",
 		get_color(LIGHT_GREEN, BLACK));
-	flip();
-	while (true) { }
+	i++;
 }
