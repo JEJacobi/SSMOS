@@ -22,7 +22,7 @@
 #define STATUS_BG				BLUE
 
 void init_terminal();
-void start_terminal();
+void run_terminal();
 
 void writeline(char* msg);
 void draw_cursor();

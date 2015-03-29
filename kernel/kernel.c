@@ -43,8 +43,8 @@ char *shtdown =	" It is now safe to turn off the computer.                      
 
 void kernel_main(int bdrive, int lomem, int himem)
 {
-	memory_init(himem); //Initialize the heap and memory handlers.
-	graphics_init(); 	//Initialize the display stuff.
+	memory_init(himem); // Initialize the heap and memory handlers.
+	graphics_init(); 	// Initialize the display stuff.
 	clear();
 	
 	// Get the color to be used for printing, pre terminal start.
@@ -83,10 +83,10 @@ void kernel_main(int bdrive, int lomem, int himem)
 		(STACK_TOP - STACK_BOTTOM) / 1024,
 		boot_color,
 		DATA_BASE);
-		
+	
 	flip();
 	
-	init_interrupts();
+	interrupts_init();	// Initialize the interrupts IDT, and PIT.
 	
 	// Initialize the terminal.
 	init_terminal();

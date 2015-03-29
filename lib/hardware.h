@@ -1,6 +1,6 @@
 // Functions for direct I/O with hardware.
 
-// Blatantly stolen from an assembly toolkit on osdev.org.
+// Most are blatantly stolen from an assembly toolkit on osdev.org.
 
 #ifndef LIB_SERIAL
 #define LIB_SERIAL
@@ -33,5 +33,15 @@ inline char inb(int port)
 inline void outb(int port, char val)
 {
 	asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));	
+}
+
+//
+//	Waits for the CPU to complete an I/O operation. Little bit finicky.
+//
+inline void io_wait()
+{
+	asm volatile ( "jmp 1f\n\t"
+			   "1:jmp 2f\n\t"
+			   "2:" );
 }
 #endif
