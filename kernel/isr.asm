@@ -56,6 +56,9 @@ with_error	0xD
 with_error	0xE
 no_error	0xF
 
+; System Calls:
+no_error	0x80
+
 ; Function for loading the IDT given the idtptr in interrupts.c
 global load_idt
 extern idtptr
