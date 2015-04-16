@@ -80,6 +80,7 @@ void handle_input()
 	if (t == '\n') // If t == newline (enter), parse input and clear buffer.
 	{
 		parse_input();
+		asm volatile("int $0x80");
 		return;
 	}
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)

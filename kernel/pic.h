@@ -9,6 +9,9 @@
 #define SLAVE_PIC_CMD		0xA0	// Command port of the secondary PIC.
 #define SLAVE_PIC_DATA		0xA1	// Data port of the secondary PIC.
 
+#define MASTER_PIC_OFFSET	0x20	// Vector offset for the first set of IRQs.
+#define SLAVE_PIC_OFFSET	0x28	// Vector offset for the second set of IRQs.
+
 #define PIC_EOI				0x20	// End of interrupt signal, sent to the PIC after an IRQ interrupt.
 
 void init_PIC();

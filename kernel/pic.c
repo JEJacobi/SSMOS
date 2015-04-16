@@ -5,6 +5,11 @@
 #include <stdint.h>
 #include "hardware.h"
 
+void init_PIC()
+{
+	
+}
+
 void send_EOI(unsigned char irq)
 {
 	if(irq >= 8) // Send the EOI to the slave if needed.
