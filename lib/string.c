@@ -6,6 +6,10 @@
 #include "system.h"
 //For memory allocation.
 
+//
+//	C-string standard library implementation.
+//
+
 size_t strlen(char *str)
 {
 	int len = 0;
@@ -155,4 +159,58 @@ void tostring(int val, char* dest, int base) // Shamelessly modified from a modi
 	*buffer = '\0';
 	
 	strrev(dest, buffer - 1);
+}
+
+//
+//	Dynamic string system:
+//
+
+string* string_new(char* init)
+{
+	// Initialize the actual structure.
+	string* str = (string*)malloc(sizeof(string)); 
+	
+	// Initialize the values.
+	str->size = strlen(init + 1); // +1 because strlen doesn't take space for the null-terminator into account.
+	str->data = (char*)malloc(str->size); // Allocate an initial string that's the same size as init.
+	
+	// And lastly, copy over the initial string and return.
+	strcpy(str->data, init); // Lastly, copy the initial string to the new dynamic string.
+	return str;
+}
+
+void string_free(string* str)
+{
+	free(str->data);
+	free(str);
+}
+
+void string_add(string* str, char* data)
+{
+
+}
+
+void string_addchar(string* str, char c)
+{
+
+}
+
+void string_set(string* str, char* data)
+{
+
+}
+
+void string_trim(string* str)
+{
+
+}
+
+void string_clear(string* str)
+{
+
+}
+
+void string_resize(string* str, size_t newsz)
+{
+
 }
