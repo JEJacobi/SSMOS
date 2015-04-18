@@ -55,6 +55,11 @@ void add_interrupt(	uint8_t num,			// Add and format an interrupt into the IDT.
 					uint8_t flags);
 bool check_interrupts_enabled(); 			// Check that interrupts are enabled.
 
-void interrupt_handler(int num, int err);
+// Awful looking parameter list is due to interrupt_handler reading the format of both
+// the custom interrupt common_handler and the pusha instruction to save the registers.
+
+void interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int err);
+
+// In other words, DO NOT CHANGE OR EVERYTHING BREAKS.
 
 #endif

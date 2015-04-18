@@ -61,7 +61,7 @@ bool check_interrupts_enabled()
     return flags & (1 << 9);
 }
 
-void interrupt_handler(int num, int err)
+void interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int err)
 {
 	asm volatile ("xchgw %bx, %bx"); // TEMP BREAKPOINT
 	
@@ -84,6 +84,16 @@ void interrupt_handler(int num, int err)
 		16);
 	printnum(
 		get_position(0, i + 2),
+		eax,
+		get_color(LIGHT_GREEN, BLACK),
+		16);
+	printnum(
+		get_position(0, i + 3),
+		esp,
+		get_color(LIGHT_GREEN, BLACK),
+		16);
+	printnum(
+		get_position(0, i + 4),
 		err,
 		get_color(LIGHT_GREEN, BLACK),
 		16);
