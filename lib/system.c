@@ -2,6 +2,15 @@
 
 // Wrappers for system calls.
 
+/*
+NOTES:
+- pusha/popa at the beginning and end of all asm syscalls, avoid clobbered registers.
+- Move the syscall ID into eax, as per the syscall document.
+- Move any parameters or outputs into the listed registers (ebx, ecx, edx, esi).
+- Trigger the syscall with software interrupt $0x80.
+- Read return values off of eax.
+*/
+
 void *malloc(size_t size)
 {
 
@@ -39,7 +48,7 @@ int system(const char *command)
 
 void clear()
 {
-
+	asm volatile("pusha; movl $0x2, %%eax; int $0x80; popa" : );
 }
 
 void ccolor(int pos, int n, char color)
