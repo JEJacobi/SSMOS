@@ -36,4 +36,7 @@
 
 # Bochs dump:
 dump/
+
+# Generated files:
 kernel/date.h
+*.~lock*

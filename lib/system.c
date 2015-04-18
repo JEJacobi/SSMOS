@@ -8,7 +8,8 @@ NOTES:
 - Move the syscall ID into eax, as per the syscall document.
 - Move any parameters or outputs into the listed registers (ebx, ecx, edx, esi).
 - Trigger the syscall with software interrupt $0x80.
-- Read return values off of eax.
+- Read return values off of eax. Be sure to do this BEFORE popa.
+- Functions with no return values should ignore the above, obviously.
 */
 
 void *malloc(size_t size)
