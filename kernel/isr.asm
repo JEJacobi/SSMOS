@@ -26,11 +26,12 @@ global interrupt_handler_%1
 %endmacro
 
 common_handle:
-	pushad		; Save all registers.
+	;xchg bx, bx
+	;pushad		; Save all registers.
 	cld			; Clear DF because of the System V ABI.
 	extern interrupt_handler
 	call interrupt_handler ; And transfer to C-land handler.
-	popad
+	;popad
 	add esp, 8 	; Restore the esp to the pre-handling state.
 	iret 		; And interrupt-return.
 

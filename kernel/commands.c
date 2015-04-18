@@ -31,6 +31,8 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
 		
+		{ "debug", "Used to trigger an external emulator debugger.", "debug - no parameters", &debug },
+		
 		{ "about", "The SSMOS about page.", "about - no parameters", &about },
 		
 		{ "version", "Displays the current version of SSMOS.", "version - no parameters", &version }
@@ -190,6 +192,12 @@ int shutdown(char* params)
 {
 	extern bool endterm;
 	endterm = true;
+	return SIG_SUCCESS;
+}
+
+int debug(char* params)
+{
+	asm volatile ("xchgw %bx, %bx");
 	return SIG_SUCCESS;
 }
 

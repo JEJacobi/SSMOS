@@ -45,6 +45,7 @@ int alias(char* params);	// Alias a string as a command.
 int cprompt(char* params);	// Change the command prompt to what's entered.
 int shutdown(char* params);	// Shut down the computer.
 
+int debug(char* params);	// Triggers Bochs' magic breakpoint, totally useless running on an actual system.
 int about(char* params);	// About SSMOS.
 int version(char* params);	// Get the current version of SSMOS and maybe the release date.
 
