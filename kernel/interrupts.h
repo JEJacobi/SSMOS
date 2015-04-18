@@ -55,6 +55,6 @@ void add_interrupt(	uint8_t num,			// Add and format an interrupt into the IDT.
 					uint8_t flags);
 bool check_interrupts_enabled(); 			// Check that interrupts are enabled.
 
-void interrupt_handler();
+void interrupt_handler(int num, int err);
 
 #endif
