@@ -21,67 +21,66 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			break;
 		
 		// clear
-		case 0x2:
-			clear();
+		case 0x2: kclear();
 			break; 
 		
 		// malloc
-		case 0x3: return malloc(ebx); 
+		case 0x3: return kmalloc(ebx); 
 		
 		// realloc
-		case 0x4: return realloc(ebx, ecx);
+		case 0x4: return krealloc(ebx, ecx);
 			
 		// free	
-		case 0x5: free(ebx);
+		case 0x5: kfree(ebx);
 			break; 
 		
 		// memcpy
-		case 0x6: memcpy(ebx, ecx, edx);
+		case 0x6: kmemcpy(ebx, ecx, edx);
 			break;
 			
 		// memset
-		case 0x7: memset(ebx, ecx, edx);
+		case 0x7: kmemset(ebx, ecx, edx);
 			break;
 		
 		// putchar
-		case 0x8:
+		case 0x8: kputchar(ebx, ecx, edx);
 			break;
 		
 		// putstring
-		case 0x9:
+		case 0x9: kputstring(ebx, ecx, edx, esi);
 			break;
 			
 		// print
-		case 0xA:
+		case 0xA: kprint(ebx, ecx, edx);
 			break;
 			
 		// printnum
-		case 0xB:
+		case 0xB: kprintnum(ebx, ecx, edx, esi);
 			break;
 			
 		// ccolor
-		case 0xC:
+		case 0xC: kccolor(ebx, ecx, edx);
 			break;
 		
 		// scroll
-		case 0xD: scroll();
+		case 0xD: kscroll();
 			break;
 		
 		// flip
-		case 0xE: flip();
+		case 0xE: kflip();
 			break;
 		
 		// sync
-		case 0xF: sync();
+		case 0xF: ksync();
 			break;
 			
 		default: // unknown or error
-			printnum( // TEMP
+			kprintnum( // TEMP
 				get_position(0, 0),
 				eax,
 				get_color(LIGHT_GREEN, BLACK),
 				16);
-			flip();
+			kflip();
 			haltdump("Unknown or invalid system call.");
 	}
 	return NULL;

@@ -12,9 +12,9 @@ echo -n `date` >> kernel/date.h
 echo -n "\"" >> kernel/date.h
 
 CC=i686-elf-gcc
-CFLAGS="-std=gnu99 -ffreestanding -O2 -Wall"
+CFLAGS="-std=gnu99 -ffreestanding -O2"
 LIB="-static -L../ -lssmos -I../lib"
-# -Wextra -v
+# -Wextra -v -Wall
 
 # Compile the system library first.
 cd lib/obj
