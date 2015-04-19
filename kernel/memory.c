@@ -9,25 +9,25 @@ void memory_init(int heapsize)
 	heapptr = (void*)HEAP_START; // Basic watermark heap system.
 }
 
-void *malloc(size_t size)
+void *kmalloc(size_t size)
 {
 	void *retptr = heapptr;
 	heapptr += size;
 	return retptr;
 }
 
-void *realloc(void *ptr, size_t newsz)
+void *krealloc(void *ptr, size_t newsz)
 {
 	// TODO: Will need memory headers working to find out how much to copy to the new block.
 	return NULL;
 }
 
-void free(void *ptr)
+void kfree(void *ptr)
 {
 	// TODO: Memory headers again.
 }
 
-void memcpy(void *dest, const void *src, size_t sz)
+void kmemcpy(void *dest, const void *src, size_t sz)
 {
 	int i;
 	
@@ -37,7 +37,7 @@ void memcpy(void *dest, const void *src, size_t sz)
 	}
 }
 
-void memset(void *dest, char c, size_t sz)
+void kmemset(void *dest, char c, size_t sz)
 {
 	int i;
 	

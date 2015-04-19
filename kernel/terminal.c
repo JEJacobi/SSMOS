@@ -36,7 +36,7 @@ static volatile char* cursor_ptr;
 
 void init_terminal()
 {
-	input = malloc(TERMINAL_INPUT_SIZE); //Allocate a block to act as a command buffer.
+	input = kmalloc(TERMINAL_INPUT_SIZE); //Allocate a block to act as a command buffer.
 	*input = 0x0;
 	input_ptr = 0;
 
@@ -66,10 +66,10 @@ void run_terminal()
 	while(!endterm)
 	{	
 		draw_prompt();
-		flip(); // Flip the data onto video memory.
+		kflip(); // Flip the data onto video memory.
 		draw_cursor(); // Followed by the cursor.
 		handle_input(); // Handle any input, backspaces, executing, parsing, etc.
-		sync(); // And wait for vsync.
+		ksync(); // And wait for vsync.
 	}
 }
 
@@ -80,7 +80,6 @@ void handle_input()
 	if (t == '\n') // If t == newline (enter), parse input and clear buffer.
 	{
 		parse_input();
-		asm volatile("pusha; movl $0x2, %%eax; int $0x80; popa" : );
 		return;
 	}
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)
@@ -93,7 +92,7 @@ void handle_input()
 		{
 			input_ptr--; // Move the pointer back to the last one.
 			input[input_ptr] = '\0'; // And clear the character input_ptr is currently pointing at.
-			putchar(
+			kputchar(
 				get_position(prompt_x + prompt_string_length + input_ptr, prompt_y),
 				' ',
 				terminal_color);
@@ -119,8 +118,8 @@ void parse_input()
 		return;
 	}
 	
-	char* cmd_string = malloc(TERMINAL_INPUT_SIZE);	// Char array to store the command in.
-	char* params = malloc(TERMINAL_INPUT_SIZE);		// Char array to store the rest of the input buffer (parameters) in.
+	char* cmd_string = kmalloc(TERMINAL_INPUT_SIZE);	// Char array to store the command in.
+	char* params = kmalloc(TERMINAL_INPUT_SIZE);		// Char array to store the rest of the input buffer (parameters) in.
 	int s = 0;
 	int s_params = 0;
 	
@@ -185,7 +184,7 @@ void writeline(char* msg)
 		
 	while (msg[i] != 0x0) // Go until a null terminator is reached.
 	{
-		putchar( // Print the characters.
+		kputchar( // Print the characters.
 			get_position(i % COLUMNS, prompt_y),
 			msg[i],
 			terminal_color);
@@ -201,11 +200,11 @@ void draw_prompt()
 {
 	if (prompt)
 	{
-		print( // Print the prompt string first.
+		kprint( // Print the prompt string first.
 			get_position(prompt_x, prompt_y),
 			prompt_string,
 			terminal_color);
-		print( // The input buffer second.
+		kprint( // The input buffer second.
 			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
 			input,														// using the precalculated prompt_string_length.
 			terminal_color);
@@ -229,12 +228,12 @@ void new_prompt()
 	
 	while (prompt_y > ROWS - 1)
 	{
-		scroll();
+		kscroll();
 		prompt_y--;
 	}
 	
 	cursor_y = prompt_y;
 	cursor_x = prompt_string_length;
 	input_ptr = 0;
-	memset(input, 0x0, TERMINAL_INPUT_SIZE);
+	kmemset(input, 0x0, TERMINAL_INPUT_SIZE);
 }

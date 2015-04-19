@@ -45,46 +45,46 @@ void kernel_main(int bdrive, int lomem, int himem)
 {
 	memory_init(himem); // Initialize the heap and memory handlers.
 	graphics_init(); 	// Initialize the display stuff.
-	clear();
+	kclear();
 	
 	// Get the color to be used for printing, pre terminal start.
 	char boot_color = get_color(BOOT_FOREGROUND, BOOT_BACKGROUND);
 	
-	print( // Print the SSMOS logo.
+	kprint( // Print the SSMOS logo.
 		get_position(0, 0),
 		logo,
 		boot_color);
 		
-	print( // Print the detection messages (bootdrive, lowmem, himem).
+	kprint( // Print the detection messages (bootdrive, lowmem, himem).
 		get_position(0, MSGS_OFFSET),
 		msgs,
 		boot_color);
 		
-	printnum( // Print the bootdrive.
+	kprintnum( // Print the bootdrive.
 		get_position(DATA_OFFSET, MSGS_OFFSET),
 		bdrive,
 		boot_color,
 		DATA_BASE);
 		
-	printnum( // Print the low memory.
+	kprintnum( // Print the low memory.
 		get_position(DATA_OFFSET, MSGS_OFFSET + 1),
 		lomem,
 		boot_color,
 		DATA_BASE);
 		
-	printnum( // Print the high memory.
+	kprintnum( // Print the high memory.
 		get_position(DATA_OFFSET, MSGS_OFFSET + 2),
 		himem,
 		boot_color,
 		DATA_BASE);
 		
-	printnum( // Print stack size.
+	kprintnum( // Print stack size.
 		get_position(DATA_OFFSET, MSGS_OFFSET + 3),
 		(STACK_TOP - STACK_BOTTOM) / 1024,
 		boot_color,
 		DATA_BASE);
 	
-	flip();
+	kflip();
 	
 	interrupts_init();	// Initialize the interrupts IDT, and PIT.
 	
@@ -99,12 +99,12 @@ void kernel_main(int bdrive, int lomem, int himem)
 	
 	disable_interrupts(); // Stop any interrupts.
 	
-	print( // Print a shutdown message on the last row.
+	kprint( // Print a shutdown message on the last row.
 		get_position(0, ROWS - 1),
 		shtdown,
 		get_color(SHUTDOWN_FG, SHUTDOWN_BG));
 	
-	flip(); // Flip the buffer for the last time.
+	kflip(); // Flip the buffer for the last time.
 	
 	return; // And return, where we'll loop forever.
 }

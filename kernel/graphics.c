@@ -18,12 +18,12 @@ static void *memend;
 
 void graphics_init()
 {
-	framebuffer = malloc(FRAMEBUFFER_SIZE);	//Get a chunk of memory to store the video framebuffer in.
-	numbuffer = malloc(NUM_PRINT_SIZE);		//Get a chunk of memory to act as a buffer for printing numbers.
+	framebuffer = kmalloc(FRAMEBUFFER_SIZE);	//Get a chunk of memory to store the video framebuffer in.
+	numbuffer = kmalloc(NUM_PRINT_SIZE);		//Get a chunk of memory to act as a buffer for printing numbers.
 	vidptr = (volatile char*)framebuffer;
 }
 
-void clear()
+void kclear()
 {
 	for( //Clear the video memory, color presets as well.
 		vidptr = (volatile char*)framebuffer; 
@@ -34,7 +34,7 @@ void clear()
 	}
 }
 
-void ccolor(int pos, int n, char color)
+void kccolor(int pos, int n, char color)
 {
 	int i;
 
@@ -49,26 +49,26 @@ void ccolor(int pos, int n, char color)
 	}
 }
 
-void scroll()
+void kscroll()
 {
 	int i;
 	
 	// Start at row #2, go till ROWS - 1 (empty space for scrolling).
 	for (i = 0; i < ROWS - 1; i++)
 	{
-		memcpy(
+		kmemcpy(
 			(void*)((int)framebuffer + (get_position(0, i))), 	// The destination, row i-1.
 			(void*)((int)framebuffer + (get_position(0, i + 1))), 		// The source, row i.
 			COLUMNS * 2); // 2 bytes per entry, thus columns * 2 bytes.
 	}
 	
-	memset( // Clear the last row of the framebuffer.
+	kmemset( // Clear the last row of the framebuffer.
 		(void*)((int)framebuffer + (get_position(0, ROWS - 1))),
 		'\0',
 		COLUMNS * 2);
 }
 
-void putchar(int pos, char c, char color)
+void kputchar(int pos, char c, char color)
 {
 	set_vidptr(pos);
 	
@@ -77,7 +77,7 @@ void putchar(int pos, char c, char color)
 	*vidptr = color; //Set the color.
 }
 
-void putstring(int pos, char *text, int c, char color)
+void kputstring(int pos, char *text, int c, char color)
 {
 	set_vidptr(pos);
 	
@@ -105,7 +105,7 @@ void putstring(int pos, char *text, int c, char color)
 	}
 }
 
-void print(int pos, char *text, char color)
+void kprint(int pos, char *text, char color)
 {
 	set_vidptr(pos);
 	
@@ -132,21 +132,21 @@ void print(int pos, char *text, char color)
 	}
 }
 
-void printnum(int pos, int num, char color, int base)
+void kprintnum(int pos, int num, char color, int base)
 {
 	tostring(num, numbuffer, base); // Turn num into a string in specified base, store in numbuffer.
-	print(pos, numbuffer, color); // And just print it as a string.
+	kprint(pos, numbuffer, color); // And just print it as a string.
 }
 
-void flip()
+void kflip()
 {
-	memcpy((void*)VIDEO_MEM,
+	kmemcpy((void*)VIDEO_MEM,
 			framebuffer,
 			FRAMEBUFFER_SIZE); 
 			//Copy the framebuffer to VIDEO_MEM, flipping the buffer onto active memory.
 }
 
-void sync()
+void ksync()
 {
 	// Will need timers/IRQ? working.
 }

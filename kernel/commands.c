@@ -10,6 +10,8 @@
 #include "string.h"
 #include "version.h"
 
+#include "system.h" // TEMP
+
 struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
 		{ "help", "Get a list of commands, or more specific information like you're doing now.",
@@ -68,11 +70,11 @@ int help(char* params)
 		else // If not, print an error message.
 		{
 			char* errmsg = "Cannot find command: ";
-			char* error = malloc(sizeof(errmsg) + TERMINAL_INPUT_SIZE);
+			char* error = kmalloc(sizeof(errmsg) + TERMINAL_INPUT_SIZE);
 			strcpy(error, errmsg);
 			strcat(error, params);
 			writeline(error); // Fancy way of printing a message and what was entered.
-			free(error);
+			kfree(error);
 		}
 	}
 	else
@@ -172,7 +174,7 @@ int cls(char* params)
 	extern int prompt_x;
 	extern int prompt_y;
 
-	clear(); // Clear the screen.
+	kclear(); // Clear the screen.
 	prompt_y = -1; // Reset the prompt to -1, so the next newline will put the prompt on row 0.
 	
 	return SIG_SUCCESS; // And report success.
