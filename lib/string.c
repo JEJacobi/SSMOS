@@ -231,7 +231,7 @@ void string_clear(string* str)
 
 void string_resize(string* str, size_t newsz)
 {
-
+	
 }
 
 int string_padding(string* str)

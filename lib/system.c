@@ -53,12 +53,18 @@ void memset(void *dest, char c, size_t sz)
 
 void sleep(int x)
 {
-
+	asm volatile("movl $0x0, %%eax; int $0x80"
+				:
+				:"b"(x));
 }
 
 int system(const char *command)
 {
-	return 0;
+	int retval;
+	asm volatile("movl $0x1, %%eax; int $0x80; movl %%eax, %0"
+				:"=a"(retval)
+				:"b"(command));
+	return retval;
 }
 
 void clear()
@@ -99,4 +105,19 @@ void printnum(int pos, int num, char color, int base)
 	asm volatile("movl $0xB, %%eax; int $0x80"
 				:
 				:"b"(pos), "c"(num), "d"(color), "S"(base));
+}
+
+void scroll()
+{
+	asm volatile("movl $0xD, %%eax; int $0x80" : );
+}
+
+void flip()
+{
+	asm volatile("movl $0xE, %%eax; int $0x80" : );
+}
+
+void sync()
+{
+	asm volatile("movl $0xF, %%eax; int $0x80" : );
 }
