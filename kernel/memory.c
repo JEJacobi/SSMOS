@@ -27,7 +27,7 @@ void kfree(void *ptr)
 	// TODO: Memory headers again.
 }
 
-void kmemcpy(void *dest, const void *src, size_t sz)
+void kmemcpy(void *dest, void *src, size_t sz)
 {
 	int i;
 	

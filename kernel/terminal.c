@@ -160,6 +160,8 @@ void parse_input()
 	{
 		return_status = cmdptr->call(params);
 		// If the command's found, transfer to the handler function (and get any return statuses).
+		
+		// TODO: Print return status.
 	}
 	else
 	{

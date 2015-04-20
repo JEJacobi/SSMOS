@@ -25,21 +25,21 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			break; 
 		
 		// malloc
-		case 0x3: return kmalloc(ebx); 
+		case 0x3: return (int)kmalloc((size_t)ebx); 
 		
 		// realloc
-		case 0x4: return krealloc(ebx, ecx);
+		case 0x4: return (int)krealloc((void*)ebx, (size_t)ecx);
 			
 		// free	
-		case 0x5: kfree(ebx);
+		case 0x5: kfree((void*)ebx);
 			break; 
 		
 		// memcpy
-		case 0x6: kmemcpy(ebx, ecx, edx);
+		case 0x6: kmemcpy((void*)ebx, (void*)ecx, (size_t)edx);
 			break;
 			
 		// memset
-		case 0x7: kmemset(ebx, ecx, edx);
+		case 0x7: kmemset((void*)ebx, ecx, (size_t)edx);
 			break;
 		
 		// putchar
@@ -47,11 +47,11 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			break;
 		
 		// putstring
-		case 0x9: kputstring(ebx, ecx, edx, esi);
+		case 0x9: kputstring(ebx, (char*)ecx, edx, esi);
 			break;
 			
 		// print
-		case 0xA: kprint(ebx, ecx, edx);
+		case 0xA: kprint(ebx, (char*)ecx, edx);
 			break;
 			
 		// printnum
@@ -83,5 +83,5 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			kflip();
 			haltdump("Unknown or invalid system call.");
 	}
-	return NULL;
+	return (int)NULL;
 }

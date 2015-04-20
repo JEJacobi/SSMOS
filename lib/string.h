@@ -54,4 +54,8 @@ void string_clear(string* str);							// Clears the string's buffer to a null te
 
 void string_resize(string* str, size_t newsz);			// Resizes the string to newsz, will erase any overflowing data.
 
+int string_padding(string* str);						// Return how many bytes are left over in the allocated buffer.
+
+int string_used(string* str);							// Return how many bytes of the allocated space have actually been used.
+
 #endif

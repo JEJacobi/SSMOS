@@ -13,7 +13,7 @@ struct element // A doubly-linked list node.
 
 // INIT:
 struct element* list_new(void* init_val);	// Construct a new linked list.
-void list_delete();							// And delete it, freeing up all space used by the list (not the data).
+void list_delete(struct element* list);		// And delete it, freeing up all space used by the list (not the data).
 
 // DATA:
 void list_add				(struct element* list, void* val);					// Add an element to the end of the list.
