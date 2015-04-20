@@ -151,13 +151,13 @@ void ksync()
 	// Will need timers/IRQ? working.
 }
 
-static void set_vidptr(int pos)
+void set_vidptr(int pos)
 {
 	// Set the video pointer to the offset given, plus the generated framebuffer.
 	vidptr = (volatile char*)(pos + framebuffer);
 }
 
-static void handle_newline()
+void handle_newline()
 {
 	int i = 0;
 	

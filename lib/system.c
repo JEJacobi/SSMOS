@@ -27,6 +27,7 @@ void *realloc(void *ptr, size_t newsz)
 				:"=a"(newptr)
 				:"b"(ptr), "c"(newsz)); 
 				// Inputs are the old pointer in ebx, and the new desired size in ecx.
+	return newptr;
 }
 
 void free(void *ptr)
@@ -57,7 +58,7 @@ void sleep(int x)
 
 int system(const char *command)
 {
-
+	return 0;
 }
 
 void clear()

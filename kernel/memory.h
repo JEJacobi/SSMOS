@@ -21,7 +21,7 @@ void memory_init(int heapsize);							// Size to initialize the primary heap, in
 void *kmalloc(size_t size);								// Allocate a block of memory.
 void *krealloc(void *ptr, size_t newsz);					// Reallocate a block of memory to a new size.
 void kfree(void *ptr);									// Free a block of memory back to the heap.
-void kmemcpy(void *dest, const void *src, size_t sz);	// Copy a block of memory to somewhere else.
+void kmemcpy(void *dest, void *src, size_t sz);	// Copy a block of memory to somewhere else.
 void kmemset(void *dest, char c, size_t sz);				// Set every byte in a block of memory to c.
 
 #endif

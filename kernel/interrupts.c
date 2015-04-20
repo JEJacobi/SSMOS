@@ -114,5 +114,6 @@ int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int 
 	else // Handle none of the above working.
 	{
 		haltdump("Unknown interrupt number.");
+		return -1; // This shouldn't happen anyway, haltdump never returns.
 	}
 }

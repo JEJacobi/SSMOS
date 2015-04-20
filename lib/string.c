@@ -187,30 +187,59 @@ void string_free(string* str)
 
 void string_add(string* str, char* data)
 {
-
+	// String buffer must have enough space for both char*'s and a null terminator.
+	if (str->size < strlen(str->data) + strlen(data) + 1)
+		string_resize(str, strlen(str->data) + strlen(data) + 1); // Resize to fit.
+	
+	strcat(str->data, data); // And just use the standard strcat to append.
 }
 
 void string_addchar(string* str, char c)
 {
-
+	if (str->size < strlen(str->data) + 2) // Only adding one character, no need to strlen the message.
+		string_resize(str, str->size + 1);
+	
+	int x = 0;
+	while(str->data[x] != 0x0)
+		x++; // Set index x to the null-terminator.
+	str->data[x++] = c; // Append character c and advance.
+	str->data[x] = 0x0; // And null-terminate as usual.
 }
 
 void string_set(string* str, char* data)
 {
-
+	if(strlen(data) + 1 > str->size) // If the new message is larger than the current capacity...
+		string_resize(str, strlen(data) + 1); // Expand the string's buffer to fit if needed.
+		
+	strcpy(str->data, data); // And copy over the new string.
 }
 
 void string_trim(string* str)
 {
-
+	string_resize(str, str->size - string_padding(str)); // Resize the string to have no padding space.
 }
 
 void string_clear(string* str)
 {
-
+	int i;
+	
+	for (i = 0; i < str->size; i++)
+	{
+		str->data[i] = 0x0; // Overwrite null-terminators into every space.
+	}
 }
 
 void string_resize(string* str, size_t newsz)
 {
 
+}
+
+int string_padding(string* str)
+{
+	return str->size - (strlen(str->data) + 1); // Return however many bytes are leftover in the allocated space.
+}
+
+int string_used(string* str)
+{
+	return str->size - string_padding(str);
 }
