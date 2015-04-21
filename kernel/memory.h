@@ -19,6 +19,10 @@ struct memory_header
 	int is_free;
 } __attribute__ ((packed));
 
+//
+// Main memory functions:
+//
+
 void memory_init(int heapsize);								// Size to initialize the primary heap, in kb.
 void *kmalloc(size_t size);									// Allocate a block of memory.
 void *krealloc(void *ptr, size_t newsz);					// Reallocate a block of memory to a new size.
@@ -26,7 +30,19 @@ void kfree(void *ptr);										// Free a block of memory back to the heap.
 void kmemcpy(void *dest, void *src, size_t sz);				// Copy a block of memory to somewhere else.
 void kmemset(void *dest, char c, size_t sz);				// Set every byte in a block of memory to c.
 
-// Internal memory operations:
+//
+// Statistics:
+//
+
+int total_blocks();	// Return how many blocks are in the kernel heap, both used and free.
+int free_blocks();	// Return the number of currently free blocks in the heap.
+int used_blocks();	// Return the number of currently used blocks in the heap.
+int free_memory();	// Return how many NON CONTIGUOUS (AKA not all usable in one chunk) bytes are marked free.
+int used_memory();	// Return how many bytes are currently marked as used.
+
+//
+// Internal memory operations (don't touch):
+//
 
 // Splits a memory block in two, at size. Both blocks must not be in use.
 void splitblock(struct memory_header* block, size_t size);
