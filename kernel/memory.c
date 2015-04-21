@@ -21,7 +21,7 @@ void memory_init(int heapsize)
 
 void *kmalloc(size_t size)
 {
-	struct memory_header* newptr = (int)HEAP_PTR;
+	struct memory_header* newptr = HEAP_PTR;
 	
 	if (newptr->next_ptr == NULL && newptr->is_free == true)
 	{
@@ -53,23 +53,41 @@ void *kmalloc(size_t size)
 
 void *krealloc(void *ptr, size_t newsz)
 {
-	return NULL;
+	struct memory_header* block = to_header(ptr);
+	
+	if (block->block_size < newsz) // Does the caller want a bigger block?
+	{
+		void* newptr = kmalloc(newsz); // Allocate a new block with the desired size.
+		kmemcpy(newptr, ptr, block->block_size); // Copy over the initial data.
+		kfree(ptr); 		// Free the old block.
+		return newptr; 	// And return a pointer to the new one.
+	}
+	else if (block->block_size > newsz) // Or does the caller want a smaller block?
+	{
+		return ptr; // TODO: Replace this with something that actually does something. Technically valid, but really wasteful.
+	}
+	else // If it's the same, just return the original pointer.
+		return ptr;
 }
 
 void kfree(void *ptr)
 {
-	// TODO: Need mergeblock().
+	struct memory_header* block = to_header(ptr); // Get the pointer to the block's header.
+	
+	// TODO: Really, REALLY need to check and merge blocks because this is terrible. Need mergeblock() working.
+	
+	block->is_free = true; // TEMP
 }
 
 void splitblock(struct memory_header* block, size_t size)
 {
-	if (size + HEADER_SIZE > block->block_size || block->is_free == false)
+	if (size + HEADER_SIZE > block->block_size || block->is_free == false) // TODO: Add SPLIT_THRESHOLD check.
 	{
 		return; // Error check, make sure block has enough space and is not already in use.
 	}
 	
 	// Split the block at size.
-	struct memory_header* newblock = (int)(block) + HEADER_SIZE + size + 1; // TODO: +1 needed?
+	struct memory_header* newblock = (struct memory_header*)((int)(block) + HEADER_SIZE + size); // TODO: +1 needed?
 	newblock->is_free = true; // Mark as free.
 	newblock->prev_ptr = block; // Set the previous block as the pre-split block.
 	newblock->next_ptr = block->next_ptr; // Set the next block to the old block's next block.
@@ -86,6 +104,79 @@ void mergeblock(struct memory_header* block1, struct memory_header* block2)
 		return; // Error check, all blocks must be marked free to be merged.
 		
 	
+}
+
+int total_blocks()
+{
+	int blocks = 0;
+	struct memory_header* blockptr = HEAP_PTR;
+	
+	while (blockptr != NULL)
+	{
+		blocks++;
+		blockptr = blockptr->next_ptr;
+	}
+	return blocks;
+}
+
+int free_blocks()
+{
+	int blocks = 0;
+	struct memory_header* blockptr = HEAP_PTR;
+	
+	while (blockptr != NULL)
+	{
+		if (blockptr->is_free == true)
+			blocks++;
+			
+		blockptr = blockptr->next_ptr;
+	}
+	return blocks;
+}
+
+int used_blocks()
+{
+	int blocks = 0;
+	struct memory_header* blockptr = HEAP_PTR;
+	
+	while (blockptr != NULL)
+	{
+		if (blockptr->is_free == false)
+			blocks++;
+			
+		blockptr = blockptr->next_ptr;
+	}
+	return blocks;
+}
+
+int free_memory()
+{
+	int bytes = 0;
+	struct memory_header* blockptr = HEAP_PTR;
+	
+	while (blockptr != NULL)
+	{
+		if (blockptr->is_free == true)
+			bytes += blockptr->block_size;
+			
+		blockptr = blockptr->next_ptr;
+	}
+	return bytes;
+}
+
+int used_memory()
+{
+	int bytes = 0;
+	struct memory_header* blockptr = HEAP_PTR;
+	
+	while (blockptr != NULL)
+	{
+		if (blockptr->is_free == false)
+			bytes += blockptr->block_size;
+			
+		blockptr = blockptr->next_ptr;
+	}
+	return bytes;
 }
 
 void *to_data(struct memory_header* block)
