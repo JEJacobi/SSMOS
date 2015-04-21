@@ -23,58 +23,15 @@ void *kmalloc(size_t size)
 {
 	struct memory_header* newptr = HEAP_PTR;
 	
-	kprintnum( // TEMP
-		get_position(0, 10),
-		(int)newptr,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	
 	if (newptr->next_ptr == NULL && newptr->is_free == true)
 	{
 		// If nothing has been allocated yet, just split off a chunk from the empty heap.
 		splitblock(newptr, size);
-		newptr->is_free = false;
-		
-		kprintnum( // TEMP
-			get_position(0, 11),
-			(int)newptr,
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 12),
-			(int)(newptr->next_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 13),
-			(int)(newptr->prev_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 14),
-			(int)(newptr->block_size),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 15),
-			(int)(newptr->is_free),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprint(
-			get_position(0, 16),
-			"malloc init",
-			get_color(LIGHT_GREEN, BLACK));
-		
 		return newptr + HEADER_SIZE; // And return the effective address.
 	}
 	
 	// Loop until a block is found which is both bigger than the required size and marked free.
-	while (newptr->block_size < size && newptr->is_free == false)
+	while (newptr->block_size < size || newptr->is_free == false)
 	{
 		if (newptr->next_ptr == NULL)
 			return NULL; // No more blocks to try, return NULL.
@@ -84,112 +41,18 @@ void *kmalloc(size_t size)
 	// Now that a block has been found, is the remaining space worth splitting into a new block?
 	if (newptr->block_size >= size + HEADER_SIZE + SPLIT_THRESHOLD)
 	{
-		kprintnum( // TEMP
-			get_position(0, 17),
-			(int)newptr,
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 18),
-			(int)(newptr->next_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 19),
-			(int)(newptr->prev_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 20),
-			(int)(newptr->block_size),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 21),
-			(int)(newptr->is_free),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-	
 		splitblock(newptr, size); // If so, split the block and return the address to the first.
 		
 		kprintnum( // TEMP
-			get_position(0, 11),
-			(int)newptr,
+			get_position(0, 10),
+			(int)size,
 			get_color(LIGHT_GREEN, BLACK),
 			16);
-			
-		kprintnum(
-			get_position(0, 12),
-			(int)(newptr->next_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 13),
-			(int)(newptr->prev_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 14),
-			(int)(newptr->block_size),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 15),
-			(int)(newptr->is_free),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprint(
-			get_position(0, 16),
-			"malloc split",
-			get_color(LIGHT_GREEN, BLACK));
 		
 		return newptr + HEADER_SIZE; // And return the effective address.
 	}
 	else // Otherwise, just mark this block as used and pass the effective address.
-	{		
-		kprintnum( // TEMP
-			get_position(0, 11),
-			(int)newptr,
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 12),
-			(int)(newptr->next_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 13),
-			(int)(newptr->prev_ptr),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 14),
-			(int)(newptr->block_size),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprintnum(
-			get_position(0, 15),
-			(int)(newptr->is_free),
-			get_color(LIGHT_GREEN, BLACK),
-			16);
-			
-		kprint(
-			get_position(0, 16),
-			"malloc fixed",
-			get_color(LIGHT_GREEN, BLACK));
-		
+	{
 		newptr->is_free = false;
 		return (void*)(newptr + HEADER_SIZE);
 	}
