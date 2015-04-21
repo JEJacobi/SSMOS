@@ -231,7 +231,16 @@ void string_clear(string* str)
 
 void string_resize(string* str, size_t newsz)
 {
+	size_t oldsz = str->size; // Temporarily store the old size.
 	
+	// Reallocate the block and update the pointer. Realloc also takes care of copying data over.
+	str->data = realloc(str->data, newsz);
+	
+	if (newsz < oldsz) // If the block has been truncated, the null-terminator's been as well.
+	{
+		str->data[newsz - 1] = 0x0; // Fix this.
+		// TODO: Check if -1 needs to be here.
+	}
 }
 
 int string_padding(string* str)
