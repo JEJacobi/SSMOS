@@ -28,7 +28,6 @@ global interrupt_handler_%1
 BUFFER: dd 0x0
 
 common_handle:
-	xchg bx, bx
 	pushad		; Save all registers.
 	cld			; Clear DF because of the System V ABI.
 	extern interrupt_handler

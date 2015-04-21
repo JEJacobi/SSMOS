@@ -66,39 +66,7 @@ bool check_interrupts_enabled()
 }
 
 int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int err)
-{
-	/*int num;
-	int err;
-	asm volatile("movl (%%esp), %0" : "=a"(err));
-	asm volatile("addl $4, %%esp; movl (%%esp), %0; subl $4, %%esp" : "=a"(num)); 
-	
-	static int i = 0;
-	print(
-		get_position(0, i),
-		"INTERRUPT",
-		get_color(LIGHT_GREEN, BLACK));
-	printnum(
-		get_position(0, i + 1),
-		num,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	printnum(
-		get_position(0, i + 2),
-		eax,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	printnum(
-		get_position(0, i + 3),
-		esp,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	printnum(
-		get_position(0, i + 4),
-		err,
-		get_color(LIGHT_GREEN, BLACK),
-		16);
-	i++;*/
-	
+{	
 	if (num >= 0x0 && num < 0x20) // Handle exceptions.
 	{
 		return 0;
