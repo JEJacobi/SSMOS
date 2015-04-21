@@ -34,4 +34,7 @@ void splitblock(struct memory_header* block, size_t size);
 // Merges two free memory blocks. Note that they MUST be marked free, or nothing happens.
 void mergeblock(struct memory_header* block1, struct memory_header* block2);
 
+void *to_data(struct memory_header* block);		// Converts a memory header's address to the data block pointer.
+struct memory_header* to_header(void* data);	// Converts a data block pointer to a pointer of the header.
+
 #endif
