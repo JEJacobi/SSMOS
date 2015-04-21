@@ -5,8 +5,9 @@
 #include <stddef.h> //size_t
 #include <stdbool.h> //bool
 
-void *malloc(size_t size);								// Allocate a chunk of memory from the heap.
+void *malloc(size_t size);								// Allocate a chunk of memory from the heap. Starts uninitialized.
 void *realloc(void *ptr, size_t newsz);					// Try to reallocate a previously malloc'd chunk of memory to newsz.
+														// Data is retained, although it may be truncated if the new size is smaller.
 void free(void *ptr);									// Free said chunk of memory after use.
 
 void memcpy(void *dest, const void *src, size_t sz);	// Copy a chunk of memory from *src to *dest, ensuring no conflicts.
