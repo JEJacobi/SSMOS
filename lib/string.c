@@ -171,6 +171,9 @@ string* string_new(size_t init)
 	string* str = (string*)malloc(sizeof(string));
 	if (str == NULL)
 		return NULL;
+		
+	if (init < 0)
+		init = 0; // Clamp the size to zero, which would just be the null terminator.
 	
 	// Initialize the values.
 	str->size = init + 1; // +1 because strlen doesn't take space for the null-terminator into account.
@@ -210,7 +213,7 @@ void string_addchar(string* str, char c)
 
 void string_addnum(string* str, int num, int base)
 {
-	char* numbuffer = (char*)kmalloc(MAX_INT_CHARS);
+	char* numbuffer = (char*)malloc(MAX_INT_CHARS);
 	tostring(num, numbuffer, base);
 	string_add(str, numbuffer);
 	free(numbuffer);
