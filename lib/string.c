@@ -165,17 +165,18 @@ void tostring(int val, char* dest, int base) // Shamelessly modified from a modi
 //	Dynamic string system:
 //
 
-string* string_new(char* init)
+string* string_new(size_t init)
 {
 	// Initialize the actual structure.
-	string* str = (string*)malloc(sizeof(string)); 
+	string* str = (string*)malloc(sizeof(string));
+	if (str == NULL)
+		return NULL;
 	
 	// Initialize the values.
-	str->size = strlen(init + 1); // +1 because strlen doesn't take space for the null-terminator into account.
-	str->data = (char*)malloc(str->size); // Allocate an initial string that's the same size as init.
+	str->size = init + 1; // +1 because strlen doesn't take space for the null-terminator into account.
+	str->data = (char*)malloc(str->size); // Allocate the string buffer with the desired initial size.
+	str->data[0] = 0x0; // Null terminate the initial emptystring.
 	
-	// And lastly, copy over the initial string and return.
-	strcpy(str->data, init); // Lastly, copy the initial string to the new dynamic string.
 	return str;
 }
 
@@ -196,14 +197,23 @@ void string_add(string* str, char* data)
 
 void string_addchar(string* str, char c)
 {
-	if (str->size < strlen(str->data) + 2) // Only adding one character, no need to strlen the message.
-		string_resize(str, str->size + 1);
+	if (str->size <= strlen(str->data) + 2) // Only adding one character, no need to strlen the message.
+		string_resize(str, str->size + 1); // Resize if necessary.
 	
 	int x = 0;
 	while(str->data[x] != 0x0)
 		x++; // Set index x to the null-terminator.
-	str->data[x++] = c; // Append character c and advance.
+	str->data[x] = c; // Append character c.
+	x++;
 	str->data[x] = 0x0; // And null-terminate as usual.
+}
+
+void string_addnum(string* str, int num, int base)
+{
+	char* numbuffer = (char*)kmalloc(MAX_INT_CHARS);
+	tostring(num, numbuffer, base);
+	string_add(str, numbuffer);
+	free(numbuffer);
 }
 
 void string_set(string* str, char* data)

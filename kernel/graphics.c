@@ -9,17 +9,16 @@
 
 #define FRAMEBUFFER_SIZE		(COLUMNS * ROWS * 2)			// The size of the framebuffer (columns * rows * 2 bytes)
 #define MEM_END					framebuffer + FRAMEBUFFER_SIZE 	// The pointer to the end of video memory.
-#define NUM_PRINT_SIZE			12								// The buffer size for printing numbers.
 
 static volatile char *vidptr;
-static char *numbuffer;
-static void *framebuffer;
-static void *memend;
+static char* numbuffer;
+static void* framebuffer;
+static void* memend;
 
 void graphics_init()
 {
 	framebuffer = kmalloc(FRAMEBUFFER_SIZE);	//Get a chunk of memory to store the video framebuffer in.
-	numbuffer = kmalloc(NUM_PRINT_SIZE);		//Get a chunk of memory to act as a buffer for printing numbers.
+	numbuffer = kmalloc(MAX_INT_CHARS);		//Get a chunk of memory to act as a buffer for printing numbers.
 	vidptr = (volatile char*)framebuffer;
 }
 

@@ -31,6 +31,8 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "cprompt", "Changes the terminal prompt the string entered.", "cprompt (x) - x: new prompt", &cprompt },
 		
+		{ "memory", "Displays operating system memory information.", "memory - no parameters", &memory },
+		
 		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
 		
 		{ "debug", "Used to trigger an external emulator debugger.", "debug - no parameters", &debug },
@@ -187,6 +189,12 @@ int tcolor(char* params)
 
 int alias(char* params)
 {
+	return SIG_SUCCESS;
+}
+
+int memory(char* params)
+{
+	// TODO: Need to append numbers. Gah.
 	return SIG_SUCCESS;
 }
 

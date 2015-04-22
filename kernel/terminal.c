@@ -118,10 +118,9 @@ void parse_input()
 		return;
 	}
 	
-	char* cmd_string = kmalloc(TERMINAL_INPUT_SIZE);	// Char array to store the command in.
-	char* params = kmalloc(TERMINAL_INPUT_SIZE);		// Char array to store the rest of the input buffer (parameters) in.
+	string* cmd_string = string_new(TERMINAL_INPUT_SIZE); // String to store the command in.
+	string* params = string_new(TERMINAL_INPUT_SIZE); // String to store the rest of the input buffer (parameters) in.	
 	int s = 0;
-	int s_params = 0;
 	
 	//
 	// Separate the input buffer to the first space.
@@ -129,11 +128,9 @@ void parse_input()
 	
 	while(input[s] != ' ' && input[s] != 0x0) // Go till a space or null-terminator is encountered.
 	{
-		cmd_string[s] = input[s]; // Copy the string to the array.
+		string_addchar(cmd_string, input[s]); // Copy the string to the array.
 		s++;
 	}
-	
-	cmd_string[s] = 0x0; // Null-terminate the command string.
 	
 	if (input[s] == 0x0)
 		goto parse; // If there are no parameters, just jump forward to the parsing.
@@ -144,9 +141,8 @@ void parse_input()
 	
 	while(input[s] != 0x0) // Copy till null-terminator.
 	{
-		params[s_params] = input[s]; 	// Copy the character at s to s_params 
-										// (counter for param characters, instead of input buffer).
-		s++; s_params++;				// And then increment both.
+		string_addchar(params, input[s]);
+		s++;
 	}
 	
 	//
@@ -154,19 +150,28 @@ void parse_input()
 	//
 	
 	parse: // Yeah yeah, dirty GOTOs.
-	cmdptr = find_cmd(cmd_string); 	// Find a command with the command string gotten earlier.
+	cmdptr = find_cmd(cmd_string->data); // Find a command with the command string gotten earlier.
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
-		return_status = cmdptr->call(params);
+		return_status = cmdptr->call(params->data);
 		// If the command's found, transfer to the handler function (and get any return statuses).
 		
 		// TODO: Print return status.
 	}
 	else
 	{
+		// temp
+		static int i = 0;
+		string* tempstr = string_new(i);
+		string_set(tempstr, "test");
+		writeline(tempstr->data);
+		string_addchar(tempstr, '!');
+		writeline(tempstr->data);
+		i++;
+	
 		writeline("Cannot find file or command:");
-		writeline(cmd_string);
+		writeline(cmd_string->data);
 		// If not found, try looking for a file?
 		
 		// If neither works, print an error message and return to the terminal.
