@@ -2,6 +2,8 @@
 #define LIB_STRING
 #include <stddef.h>
 
+#define MAX_INT_CHARS			12								// The maximum amount of characters an int can occupy as a string.
+
 //
 //	Standard C-string operations, mostly ripped wholesale from the standard library.
 //
@@ -35,7 +37,7 @@ typedef struct string
 } string;
 
 // Creation/deletion:
-string* string_new(char* init);							// Creates a new dynamic string.
+string* string_new(size_t init);						// Creates a new dynamic string.
 
 void string_free(string* str);							// Frees the string and its buffer.
 
@@ -43,6 +45,8 @@ void string_free(string* str);							// Frees the string and its buffer.
 void string_add(string* str, char* data);				// Appends (and expands if necessary), *data onto the string.
 
 void string_addchar(string* str, char c);				// Appends (and expands if necessary), c onto the string.
+
+void string_addnum(string* str, int num, int base);		// Appends integer 'num' to the string.
 
 void string_set(string* str, char* data);				// Clears and sets *str to *data, expanding if necessary.
 
