@@ -2,7 +2,7 @@
 #define LIB_STRING
 #include <stddef.h>
 
-#define MAX_INT_CHARS			12								// The maximum amount of characters an int can occupy as a string.
+#define MAX_INT_CHARS		15	// The maximum amount of characters an int can occupy as a string.
 
 //
 //	Standard C-string operations, mostly ripped wholesale from the standard library.
