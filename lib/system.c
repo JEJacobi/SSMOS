@@ -14,18 +14,20 @@ NOTES:
 void *malloc(size_t size)
 {
 	void* ptr;
-	asm volatile("movl $0x3, %%eax; int $0x80; movl %%eax, %0"
-				:"=a"(ptr)		// Output ptr in eax.
-				:"b"(size));	// Input through ebx.
+	asm volatile("movl $0x3, %%eax; int $0x80"
+				:"=a"(ptr)	// Output ptr in eax.
+				:"b"(size)	// Input through ebx.
+				:"ecx", "edx", "memory");	
 	return ptr;
 }
 
 void *realloc(void *ptr, size_t newsz)
 {
 	void* newptr;
-	asm volatile("movl $0x4, %%eax; int $0x80; movl %%eax, %0"
+	asm volatile("movl $0x4, %%eax; int $0x80"
 				:"=a"(newptr)
-				:"b"(ptr), "c"(newsz)); 
+				:"b"(ptr), "c"(newsz)
+				:"edx", "memory"); 
 				// Inputs are the old pointer in ebx, and the new desired size in ecx.
 	return newptr;
 }
@@ -34,21 +36,24 @@ void free(void *ptr)
 {
 	asm volatile("movl $0x5, %%eax; int $0x80"
 				: // No return value from free.
-				:"b"(ptr)); // Only input is the old pointer to free in ebx.
+				:"b"(ptr) // Only input is the old pointer to free in ebx.
+				:"%eax", "ecx", "edx", "memory");
 }
 
 void memcpy(void *dest, const void *src, size_t sz)
 {
 	asm volatile("movl $0x6, %%eax; int $0x80"
 				:
-				:"b"(dest), "c"(src), "d"(sz));
+				:"b"(dest), "c"(src), "d"(sz)
+				:"eax");
 }
 
 void memset(void *dest, char c, size_t sz)
 {
 	asm volatile("movl $0x7, %%eax; int $0x80"
 				:
-				:"b"(dest), "c"(c), "d"(sz));
+				:"b"(dest), "c"(c), "d"(sz)
+				:"eax");
 }
 
 void sleep(int x)
@@ -63,7 +68,8 @@ int system(const char *command)
 	int retval;
 	asm volatile("movl $0x1, %%eax; int $0x80; movl %%eax, %0"
 				:"=a"(retval)
-				:"b"(command));
+				:"b"(command)
+				:"%ecx", "edx");
 	return retval;
 }
 

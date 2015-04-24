@@ -46,7 +46,6 @@ char *strcat(char *dest, char *src)
 	
 	while (*y != 0x0)
 	{
-		asm volatile ("xchgw %bx, %bx");
 		*x = *y; // Copy each character of y to the destination offset.
 		x++; y++; // And increment both.
 	}

@@ -19,9 +19,9 @@ void memory_init(int heapsize)
 	HEAP_PTR->is_free = true; // And lastly, mark it as free.
 	
 	// Log the heap initialization.
-	string* logmsg = string_newsz(127);
+	string* logmsg = string_new();
 	string_add(logmsg, "Kernel heap initialized, ");
-	//string_addnum(logmsg, HEAP_PTR->block_size, 10);
+	string_addnum(logmsg, (heapsize * 1024) - HEADER_SIZE, 10);
 	string_add(logmsg, " bytes found and allocated.");
 	klog(logmsg);
 }
@@ -34,6 +34,7 @@ void *kmalloc(size_t size)
 	{
 		// If nothing has been allocated yet, just split off a chunk from the empty heap.
 		splitblock(newptr, size);
+			asm volatile("xchg %bx, %bx");
 		return to_data(newptr); // And return the effective address.
 	}
 	
@@ -49,11 +50,13 @@ void *kmalloc(size_t size)
 	if (newptr->block_size >= size + HEADER_SIZE + SPLIT_THRESHOLD)
 	{
 		splitblock(newptr, size); // If so, split the block and return the address to the first.
+			asm volatile("xchg %bx, %bx");
 		return to_data(newptr); // And return the effective address.
 	}
 	else // Otherwise, just mark this block as used and pass the effective address.
 	{
 		newptr->is_free = false;
+			asm volatile("xchg %bx, %bx");
 		return to_data(newptr);
 	}
 }
