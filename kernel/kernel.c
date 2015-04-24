@@ -7,6 +7,8 @@
 #include <stdint.h>
 
 #include "array.h"
+#include "debug.h"
+#include "list.h"
 #include "string.h"
 #include "math.h"
 #include "memory.h"
@@ -43,6 +45,7 @@ char *shtdown =	" It is now safe to turn off the computer.                      
 
 void kernel_main(int bdrive, int lomem, int himem)
 {
+	interrupts_init();	// Initialize the interrupts, IDT, and PIT.
 	memory_init(himem); // Initialize the heap and memory handlers.
 	graphics_init(); 	// Initialize the display stuff.
 	kclear();
@@ -85,8 +88,6 @@ void kernel_main(int bdrive, int lomem, int himem)
 		DATA_BASE);
 	
 	kflip();
-	
-	interrupts_init();	// Initialize the interrupts IDT, and PIT.
 	
 	// Initialize the terminal.
 	init_terminal();

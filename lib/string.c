@@ -6,6 +6,8 @@
 #include "system.h"
 //For memory allocation.
 
+char* numbuffer;
+
 //
 //	C-string standard library implementation.
 //
@@ -44,6 +46,7 @@ char *strcat(char *dest, char *src)
 	
 	while (*y != 0x0)
 	{
+		asm volatile ("xchgw %bx, %bx");
 		*x = *y; // Copy each character of y to the destination offset.
 		x++; y++; // And increment both.
 	}
@@ -165,7 +168,12 @@ void tostring(int val, char* dest, int base) // Shamelessly modified from a modi
 //	Dynamic string system:
 //
 
-string* string_new(size_t init)
+string* string_new()
+{
+	return string_newsz(0);
+}
+
+string* string_newsz(size_t init)
 {
 	// Initialize the actual structure.
 	string* str = (string*)malloc(sizeof(string));
@@ -187,6 +195,13 @@ void string_free(string* str)
 {
 	free(str->data);
 	free(str);
+}
+
+string* string_fromchar(char* data)
+{
+	string* newstr = string_new(strlen(data)); // Allocate the space needed for the message.
+	strcpy(newstr->data, data); // Copy the existing message.
+	return newstr; // And return the new string.
 }
 
 void string_add(string* str, char* data)
@@ -213,10 +228,10 @@ void string_addchar(string* str, char c)
 
 void string_addnum(string* str, int num, int base)
 {
-	char* numbuffer = (char*)malloc(MAX_INT_CHARS);
+	if (numbuffer == NULL)
+		numbuffer = (char*)malloc(MAX_INT_CHARS);
 	tostring(num, numbuffer, base);
 	string_add(str, numbuffer);
-	free(numbuffer);
 }
 
 void string_set(string* str, char* data)
@@ -248,7 +263,6 @@ void string_resize(string* str, size_t newsz)
 	
 	// Reallocate the block and update the pointer. Realloc also takes care of copying data over.
 	str->data = realloc(str->data, newsz);
-	
 	if (newsz < oldsz) // If the block has been truncated, the null-terminator's been as well.
 	{
 		str->data[newsz - 1] = 0x0; // Fix this.

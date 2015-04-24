@@ -3,8 +3,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "graphics.h" // TEMP
-#include "output.h" // TEMP
+#include "debug.h"
+#include "string.h"
 
 //
 //	Kernel heap memory manager.
@@ -17,6 +17,13 @@ void memory_init(int heapsize)
 	HEAP_PTR->prev_ptr = NULL;
 	HEAP_PTR->block_size = (heapsize * 1024) - HEADER_SIZE; // The initial free block contains all himem minus this header.
 	HEAP_PTR->is_free = true; // And lastly, mark it as free.
+	
+	// Log the heap initialization.
+	string* logmsg = string_newsz(127);
+	string_add(logmsg, "Kernel heap initialized, ");
+	//string_addnum(logmsg, HEAP_PTR->block_size, 10);
+	string_add(logmsg, " bytes found and allocated.");
+	klog(logmsg);
 }
 
 void *kmalloc(size_t size)

@@ -169,6 +169,7 @@ void parse_input()
 		string_addchar(tempstr, '!');
 		writeline(tempstr->data);
 		i++;
+		syslog(NULL);
 	
 		writeline("Cannot find file or command:");
 		writeline(cmd_string->data);

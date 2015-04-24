@@ -28,6 +28,9 @@ void list_removeat			(struct element* list, int index);					// Remove an element
 void list_removelast		(struct element* list);								// Remove the last element.
 int list_count				(struct element* list);								// Get how many nodes are in the list.
 
+void list_sort				(struct element* list,								// Sort linked list, given 
+							int (*compare)(const void *, const void *));		// comparison function compare().
+
 // Note, removing items from a list DOES NOT FREE what the value pointer is pointing to.
 
 struct element* get_first	(struct element* list);				// Return a pointer to the first element.

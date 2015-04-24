@@ -7,7 +7,7 @@
 
 struct element* list_new(void* init_val)
 {
-	struct element* newlist = malloc(sizeof(struct element));
+	struct element* newlist = (struct element*)malloc(sizeof(struct element));
 	newlist->value = init_val;
 	newlist->next = NULL;
 	newlist->prev = NULL;
@@ -109,6 +109,11 @@ int list_count(struct element* list)
 	}
 	
 	return c;
+}
+
+void list_sort(struct element* list, int (*compare)(const void *, const void *))
+{
+	
 }
 
 struct element* get_first(struct element* list)

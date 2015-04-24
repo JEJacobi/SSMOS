@@ -43,6 +43,7 @@ int cls(char* params);		// Clear the screen.
 int tcolor(char* params);	// Sets the terminal's color and refreshes the screen.
 int alias(char* params);	// Alias a string as a command.
 int cprompt(char* params);	// Change the command prompt to what's entered.
+int syslog(char* params);	// Displays the system log.
 int memory(char* params);	// Displays operating system memory information.
 int shutdown(char* params);	// Shut down the computer.
 
