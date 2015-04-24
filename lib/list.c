@@ -33,6 +33,7 @@ void list_add(struct element* list, void* val)
 	struct element* newelem = malloc(sizeof(struct element)); // Allocate space for the element.
 	newelem->value = val; // Copy the given value.
 	newelem->prev = list; // Since list_add appends values, the previous pointer is the last element in the list.
+	list->next = newelem; // Update the end of the list.
 	newelem->next = NULL; // And make sure the next element is marked as null.
 }
 

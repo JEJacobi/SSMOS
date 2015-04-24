@@ -36,6 +36,10 @@ static volatile char* cursor_ptr;
 
 void init_terminal()
 {
+	string* logmsg = string_new();
+	string_set(logmsg, "Setting up terminal...");
+	klog(logmsg); // Logging.
+	
 	input = kmalloc(TERMINAL_INPUT_SIZE); //Allocate a block to act as a command buffer.
 	*input = 0x0;
 	input_ptr = 0;
@@ -57,6 +61,10 @@ void init_terminal()
 	
 	// And lastly, get the color for the terminal status bar.
 	status_color = get_color(STATUS_FG, STATUS_BG);
+	
+	logmsg = string_new();
+	string_set(logmsg, "Terminal initialization complete, ready to run.");
+	klog(logmsg); // More logging.
 }
 
 void run_terminal()
@@ -118,8 +126,8 @@ void parse_input()
 		return;
 	}
 	
-	string* cmd_string = string_new(TERMINAL_INPUT_SIZE); // String to store the command in.
-	string* params = string_new(TERMINAL_INPUT_SIZE); // String to store the rest of the input buffer (parameters) in.	
+	string* cmd_string = string_newsz(TERMINAL_INPUT_SIZE); // String to store the command in.
+	string* params = string_newsz(TERMINAL_INPUT_SIZE); // String to store the rest of the input buffer (parameters) in.	
 	int s = 0;
 	
 	//
@@ -161,21 +169,11 @@ void parse_input()
 	}
 	else
 	{
-		// temp
-		static int i = 0;
-		string* tempstr = string_new(i);
-		string_set(tempstr, "test");
-		writeline(tempstr->data);
-		string_addchar(tempstr, '!');
-		writeline(tempstr->data);
-		i++;
-		syslog(NULL);
-	
-		writeline("Cannot find file or command:");
-		writeline(cmd_string->data);
 		// If not found, try looking for a file?
 		
 		// If neither works, print an error message and return to the terminal.
+		writeline("Cannot find file or command:");
+		writeline(cmd_string->data);
 	}
 	
 	// TODO: Add pointers to the allocated buffers: cmd_string and params.

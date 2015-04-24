@@ -9,7 +9,7 @@
 #include "graphics.h"
 #include "output.h"
 #include "terminal.h"
-
+#include "string.h"
 #include "syscalls.h"
 
 struct idt_entry idt[IDT_SIZE];

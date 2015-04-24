@@ -10,6 +10,8 @@
 //	Kernel heap memory manager.
 //
 
+string* outofmem;
+
 void memory_init(int heapsize)
 {
 	// Create a root memory header at HEAP_START.
@@ -24,6 +26,10 @@ void memory_init(int heapsize)
 	string_addnum(logmsg, (heapsize * 1024) - HEADER_SIZE, 10);
 	string_add(logmsg, " bytes found and allocated.");
 	klog(logmsg);
+	
+	// Prepare any error messages.
+	outofmem = string_new();
+	string_set(outofmem, "ERROR: Cannot allocate desired memory!");
 }
 
 void *kmalloc(size_t size)
@@ -34,7 +40,6 @@ void *kmalloc(size_t size)
 	{
 		// If nothing has been allocated yet, just split off a chunk from the empty heap.
 		splitblock(newptr, size);
-			asm volatile("xchg %bx, %bx");
 		return to_data(newptr); // And return the effective address.
 	}
 	
@@ -42,7 +47,10 @@ void *kmalloc(size_t size)
 	while (newptr->block_size < size || newptr->is_free == false)
 	{
 		if (newptr->next_ptr == NULL)
+		{
+			klog(outofmem); // Log the error.
 			return NULL; // No more blocks to try, return NULL.
+		}
 		newptr = newptr->next_ptr;
 	}
 	
@@ -50,13 +58,11 @@ void *kmalloc(size_t size)
 	if (newptr->block_size >= size + HEADER_SIZE + SPLIT_THRESHOLD)
 	{
 		splitblock(newptr, size); // If so, split the block and return the address to the first.
-			asm volatile("xchg %bx, %bx");
 		return to_data(newptr); // And return the effective address.
 	}
 	else // Otherwise, just mark this block as used and pass the effective address.
 	{
 		newptr->is_free = false;
-			asm volatile("xchg %bx, %bx");
 		return to_data(newptr);
 	}
 }

@@ -25,10 +25,10 @@ void graphics_init()
 	vidptr = (volatile char*)framebuffer;
 	
 	// Log the graphics initialization.
-	/*string* logmsg = string_newsz(128);
-	string_add(logmsg, "Graphics driver initialized, framebuffer allocated at ");
+	string* logmsg = string_new();
+	string_add(logmsg, "Graphics driver initialized, framebuffer allocated at 0x");
 	string_addnum(logmsg, (int)framebuffer, 16);
-	klog(logmsg);*/
+	klog(logmsg);
 }
 
 void kclear()
