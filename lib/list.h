@@ -8,7 +8,7 @@ struct element // A doubly-linked list node.
 {
 	void* value;			// The value, unknown to the actual list.
 	struct element* next;	// The next element in a list, if it's NULL, this is the last element.
-	struct element* prev;	// The previous elemnt in a list, if it's NULL, this is the first element.
+	struct element* prev;	// The previous element in a list, if it's NULL, this is the first element.
 };
 
 //

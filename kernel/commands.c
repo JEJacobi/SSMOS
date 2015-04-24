@@ -205,8 +205,7 @@ int syslog(char* params)
 	{
 		stringbuffer = syslogptr->value;
 		writeline(stringbuffer->data);
-		
-		syslogptr = syslogptr->next;
+		syslogptr = syslogptr->next; // Write each entry in the system log.
 	}
 	
 	return SIG_SUCCESS;
