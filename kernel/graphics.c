@@ -2,6 +2,9 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+
+#include "debug.h"
+#include "list.h"
 #include "math.h"
 #include "memory.h"
 #include "string.h"
@@ -20,6 +23,12 @@ void graphics_init()
 	framebuffer = kmalloc(FRAMEBUFFER_SIZE);	//Get a chunk of memory to store the video framebuffer in.
 	numbuffer = kmalloc(MAX_INT_CHARS);		//Get a chunk of memory to act as a buffer for printing numbers.
 	vidptr = (volatile char*)framebuffer;
+	
+	// Log the graphics initialization.
+	/*string* logmsg = string_newsz(128);
+	string_add(logmsg, "Graphics driver initialized, framebuffer allocated at ");
+	string_addnum(logmsg, (int)framebuffer, 16);
+	klog(logmsg);*/
 }
 
 void kclear()

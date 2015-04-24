@@ -37,9 +37,13 @@ typedef struct string
 } string;
 
 // Creation/deletion:
-string* string_new(size_t init);						// Creates a new dynamic string.
+string* string_new();									// Creates a new empty, zero length dynamic string.
+
+string* string_newsz(size_t init);						// Creates a new dynamic string of size init.
 
 void string_free(string* str);							// Frees the string and its buffer.
+
+string* string_fromchar(char* data);					// Creates a new dynamic string from a standard C-string.
 
 // String operations:
 void string_add(string* str, char* data);				// Appends (and expands if necessary), *data onto the string.

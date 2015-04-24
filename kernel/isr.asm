@@ -33,7 +33,7 @@ common_handle:
 	extern interrupt_handler
 	call interrupt_handler ; And transfer to C-land handler.
 	mov [BUFFER], eax ; Buffer the return value around popad.
-	xchg bx, bx
+	;xchg bx, bx
 	popad
 	mov eax, [BUFFER] ; Unbuffer, and clear edx since it's the other return register.
 	xor edx, edx

@@ -2,15 +2,16 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+
 #include "date.h"
+#include "debug.h"
 #include "memory.h"
 #include "terminal.h"
 #include "graphics.h"
 #include "output.h"
+#include "list.h"
 #include "string.h"
 #include "version.h"
-
-#include "system.h" // TEMP
 
 struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
@@ -30,6 +31,8 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		"alias (x) (y) - x: alias name, y: command", &alias },
 		
 		{ "cprompt", "Changes the terminal prompt the string entered.", "cprompt (x) - x: new prompt", &cprompt },
+		
+		{ "syslog", "Displays the recent system log.", "syslog - no parameters", &syslog },
 		
 		{ "memory", "Displays operating system memory information.", "memory - no parameters", &memory },
 		
@@ -189,6 +192,23 @@ int tcolor(char* params)
 
 int alias(char* params)
 {
+	return SIG_SUCCESS;
+}
+
+int syslog(char* params)
+{
+	struct element* syslogptr = getlog();
+	string* stringbuffer;
+	
+	syslogptr = get_first(syslogptr);
+	while (syslogptr != NULL)
+	{
+		stringbuffer = syslogptr->value;
+		writeline(stringbuffer->data);
+		
+		syslogptr = syslogptr->next;
+	}
+	
 	return SIG_SUCCESS;
 }
 
