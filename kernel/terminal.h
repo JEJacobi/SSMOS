@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "commands.h"
+#include "list.h"
 
 #define PROMPT_STRING			"#>"
 #define PROMPT_START_X			0
