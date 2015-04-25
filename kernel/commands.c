@@ -236,6 +236,7 @@ int alias(char* params)
 
 int syslog(char* params)
 {
+	writeline("");
 	struct element* syslogptr = getlog();
 	string* stringbuffer;
 	
@@ -246,7 +247,7 @@ int syslog(char* params)
 		writeline(stringbuffer->data);
 		syslogptr = syslogptr->next; // Write each entry in the system log.
 	}
-	
+	writeline("");
 	return SIG_SUCCESS;
 }
 
