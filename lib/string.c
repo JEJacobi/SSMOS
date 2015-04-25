@@ -207,7 +207,7 @@ void string_add(string* str, char* data)
 {
 	// String buffer must have enough space for both char*'s and a null terminator.
 	if (str->size < strlen(str->data) + strlen(data) + 1)
-		string_resize(str, strlen(str->data) + strlen(data) + 1); // Resize to fit.
+		string_resize(str, strlen(str->data) + strlen(data)); // Resize to fit.
 	
 	strcat(str->data, data); // And just use the standard strcat to append.
 }
@@ -236,7 +236,7 @@ void string_addnum(string* str, int num, int base)
 void string_set(string* str, char* data)
 {
 	if(strlen(data) + 1 > str->size) // If the new message is larger than the current capacity...
-		string_resize(str, strlen(data) + 1); // Expand the string's buffer to fit if needed.
+		string_resize(str, strlen(data)); // Expand the string's buffer to fit if needed.
 		
 	strcpy(str->data, data); // And copy over the new string.
 }
@@ -259,9 +259,10 @@ void string_clear(string* str)
 void string_resize(string* str, size_t newsz)
 {
 	size_t oldsz = str->size; // Temporarily store the old size.
-	
+	newsz++; // Take into account the null terminator.
 	// Reallocate the block and update the pointer. Realloc also takes care of copying data over.
 	str->data = realloc(str->data, newsz);
+	str->size = newsz;
 	if (newsz < oldsz) // If the block has been truncated, the null-terminator's been as well.
 	{
 		str->data[newsz - 1] = 0x0; // Fix this.

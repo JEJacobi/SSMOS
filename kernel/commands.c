@@ -25,7 +25,7 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "cls", "Clears the screen.", "cls - no parameters", &cls },
 		
-		{ "tcolor", "Changes the text and screen color. Valid colors are: Black, Blue, Cyan, Green,  Magenta, Brown, and White.", "tcolor (x) (y) - x: foreground, y: background", &tcolor },
+		{ "tcolor", "Changes the text and screen color. Valid colors are: black, blue, cyan, green,  magenta, red, brown, and white.", "tcolor (x) (y) - x: foreground, y: background", &tcolor },
 		
 		{ "alias", "Aliases parameters as a command, however normal commands take precedence.",
 		"alias (x) (y) - x: alias name, y: command", &alias },
@@ -53,7 +53,7 @@ struct command* find_cmd(char* input)
 	for (i = 0; i < num_commands; i++)
 	{
 		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
-			return &commands[i]; // If found, return a pointer to the commmand.
+			return &commands[i]; // If found, return a pointer to the command.
 	}
 	return NULL; // If none are found, return NULL.
 }
@@ -187,7 +187,46 @@ int cls(char* params)
 
 int tcolor(char* params)
 {
+	int i = 0;
+	string* foreground = string_new();
+	string* background = string_new();
+	
+	while (params[i] != ' ' && params[i] != 0x0) // Copy the first word to the foreground string.
+	{
+		string_addchar(foreground, params[i]);
+		i++;
+	}
+	
+	// If we've run into a null terminator before the second word.
+	if (params[i] == 0x0)
+		goto error;
+	
+	i++; // Advance past the space.
+		
+	while (params[i] != ' ' && params[i] != 0x0)
+	{
+		string_addchar(background, params[i]);
+		i++;
+	}
+	
+	// Now that we have both words separated, try to find a matching color for each:
+	enum color fg = tocolor(foreground);
+	enum color bg = tocolor(background);
+	
+	if (fg == UNKNOWN || bg == UNKNOWN)
+		goto error; // If either parsing fails, jump ahead to error handling.
+	
+	terminal_color = get_color(fg, bg); // Get the color using the parsed strings.
+	cursor_color = get_color(fg, CURSOR_BG);
+	
+	string_free(foreground); string_free(background);
 	return SIG_SUCCESS;
+	
+	error: // Deal with any errors.
+		// Free the strings, don't want a memory leak.
+		string_free(foreground); string_free(background);
+		writeline("Cannot parse color parameters, see help for format.");
+		return SIG_FAIL;
 }
 
 int alias(char* params)
@@ -213,7 +252,30 @@ int syslog(char* params)
 
 int memory(char* params)
 {
-	// TODO: Need to append numbers. Gah.
+	string* buffer = string_new();
+	string_add(buffer, "Used Memory: ");
+	string_addnum(buffer, used_memory(), 10);
+	string_add(buffer, " bytes, in ");
+	string_addnum(buffer, used_blocks(), 10);
+	string_add(buffer, " blocks.");
+	writeline(buffer->data); // Write data on used memory/blocks.
+	
+	string_set(buffer, "Free Memory: ");
+	string_addnum(buffer, free_memory(), 10);
+	string_add(buffer, " bytes, in ");
+	string_addnum(buffer, free_blocks(), 10);
+	string_add(buffer, " blocks.");
+	writeline(buffer->data); // Write data on free memory/blocks.
+	
+	string_set(buffer, "Total Memory: ");
+	string_addnum(buffer, free_memory() + used_memory(), 10);
+	string_add(buffer, " bytes, in ");
+	string_addnum(buffer, total_blocks(), 10);
+	string_add(buffer, " blocks.");
+	writeline(buffer->data); // Write data on total memory/blocks.
+	
+	string_free(buffer); // And free the string buffer.
+	
 	return SIG_SUCCESS;
 }
 
@@ -244,5 +306,6 @@ int about(char* params)
 int version(char* params)
 {
 	writeline(VERSION);
+	writeline(COMPILE_DATE);
 	return SIG_SUCCESS;
 }

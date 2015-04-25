@@ -2,7 +2,9 @@
 
 #ifndef LIB_GRAPHICS
 #define LIB_GRAPHICS
-#include <math.h>
+
+#include "math.h"
+#include "string.h"
 
 #define VIDEO_MEM	0xb8000	// Location of VGA video memory.
 #define COLUMNS		80		// How many columns of characters.
@@ -26,22 +28,25 @@ enum color					// VGA text mode color choices.
 	LIGHT_MAGENTA = 13,
 	LIGHT_BROWN = 14,
 	WHITE = 15,
+	UNKNOWN = 16,
 };
 
 inline int get_position(int x, int y)	// Get the combined position to write to.
 {
 	int val = 0;
-	y = (int)clamp(y, 0, ROWS - 1);							// Clamp entries to existing columns and rows.
-	x = (int)clamp(x, 0, (COLUMNS * (ROWS - y)) - 1);		// Note that x is allowed to overflow to facilitate wordwrapping,
-															// but is locked to the remaining entries (ROWS / y).
+	y = (int)clamp(y, 0, ROWS - 1);						// Clamp entries to existing columns and rows.
+	x = (int)clamp(x, 0, (COLUMNS * (ROWS - y)) - 1);	// Note that x is allowed to overflow to facilitate wordwrapping,
+														// but is locked to the remaining entries (ROWS / y).
 	val += x * 2;
 	val += y * 160;
 	return val;
 }
 
-inline char get_color(enum color fg, enum color bg)			//Get the formatted combined color for VGA text mode.
+inline char get_color(enum color fg, enum color bg)		//Get the formatted combined color for VGA text mode.
 {
 	return fg | bg << 4;
 }
 
+enum color tocolor(string* str);						// Convert a string into a color enum.
+														// Note that strings are converted to lower-case if they aren't already.
 #endif
