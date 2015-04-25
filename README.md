@@ -23,3 +23,5 @@ If, for some bizarre reason, you have an urge to compile an operating system wit
 Once those two are set up, extract SSMOS into your choice of folder. If you haven't installed the cross compiler, open up make.sh, and modify CC as a path to it. After that, it should be as simple as going to the folder and running:
 
 `./make.sh`
+
+And for all that is good in this world, don't run SSMOS on any drive with any data you wouldn't be okay with losing.
