@@ -126,8 +126,8 @@ void parse_input()
 		return;
 	}
 	
-	string* cmd_string = string_newsz(TERMINAL_INPUT_SIZE); // String to store the command in.
-	string* params = string_newsz(TERMINAL_INPUT_SIZE); // String to store the rest of the input buffer (parameters) in.	
+	string* cmd_string = string_new(); // String to store the command in.
+	string* params = string_new(); // String to store the rest of the input buffer (parameters) in.	
 	int s = 0;
 	
 	//

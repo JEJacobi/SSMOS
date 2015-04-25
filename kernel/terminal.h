@@ -21,6 +21,10 @@
 #define STATUS_FG				WHITE
 #define STATUS_BG				BLUE
 
+extern char terminal_color;
+extern char cursor_color;
+extern char status_color;
+
 void init_terminal();
 void run_terminal();
 
