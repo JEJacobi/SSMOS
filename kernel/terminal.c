@@ -33,6 +33,8 @@ bool endterm;
 string* input;
 int input_ptr;
 
+struct element* cmdhistory;
+
 static volatile char* cursor_ptr;
 
 void init_terminal()
@@ -40,6 +42,8 @@ void init_terminal()
 	string* logmsg = string_new();
 	string_set(logmsg, "Setting up terminal...");
 	klog(logmsg); // Logging.
+	
+	cmdhistory = list_new(NULL); // Initialize history list.
 	
 	input = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a string to act as a command buffer.
 	input_ptr = 0;
@@ -119,6 +123,7 @@ void parse_input()
 {
 	struct command* cmdptr;
 	int return_status;
+	int s = 0;
 
 	if (input_ptr <= 0) // If there's nothing in the buffer, just advance to the next line.
 	{
@@ -128,7 +133,18 @@ void parse_input()
 	
 	string* cmd_string = string_new(); // String to store the command in.
 	string* params = string_new(); // String to store the rest of the input buffer (parameters) in.	
-	int s = 0;
+	string* historystr = string_new(); // String to store the executed text and link to the history list.
+	
+	//
+	// Handle command history:
+	//
+	
+	string_add(historystr, input->data); // Record the executed command.
+	
+	if (cmdhistory->value == NULL) // If there's nothing in the list yet, set the first value.
+		cmdhistory->value = historystr; 
+	else // Otherwise, just append it.
+		list_add(cmdhistory, historystr);
 	
 	//
 	// Separate the input buffer to the first space.
@@ -178,9 +194,7 @@ void parse_input()
 		writeline(cmd_string->data);
 	}
 	
-	// TODO: Add pointers to the allocated buffers: cmd_string and params.
-	// A linked list of these would function as a history system.
-	
+	string_free(cmd_string); string_free(params); // Free the used strings.
 	new_prompt(); // And new prompt.
 }
 

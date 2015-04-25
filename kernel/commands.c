@@ -19,7 +19,7 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		{ "help", "Get a list of commands, or more specific information like you're doing now.",
 		"help (x) - x: given command", &help },
 		
-		{ "history", "Display recent terminal command history.", "history - no parameters", &history },
+		{ "history", "Display recent terminal history.", "history - no parameters", &history },
 		
 		{ "memview", "Display a screen of memory, starting at the specified location.", 
 		"memview (x) - x: starting location", &memview },
@@ -75,12 +75,11 @@ int help(char* params)
 		}
 		else // If not, print an error message.
 		{
-			char* errmsg = "Cannot find command: ";
-			char* error = kmalloc(sizeof(errmsg) + TERMINAL_INPUT_SIZE);
-			strcpy(error, errmsg);
-			strcat(error, params);
-			writeline(error); // Fancy way of printing a message and what was entered.
-			kfree(error);
+			string* errmsg = string_new();
+			string_set(errmsg, "Cannot find command: ");
+			string_add(errmsg, params);
+			writeline(errmsg->data);
+			string_free(errmsg);
 		}
 	}
 	else
@@ -101,7 +100,30 @@ int help(char* params)
 
 int history(char* params)
 {
-	// TODO: Will need some kind of command storage.
+	extern struct element* cmdhistory;
+	struct element* historyptr = get_first(cmdhistory);
+	string* stringbuffer = string_newsz(TERMINAL_INPUT_SIZE);
+	string* strptr;
+	int i = 1;
+	
+	writeline(""); // Write each entry of the history list.
+	while (historyptr != NULL)
+	{	
+		strptr = historyptr->value;
+
+		string_addnum(stringbuffer, i, 10);
+		string_add(stringbuffer, ". ");
+		string_add(stringbuffer, strptr->data);
+		
+		writeline(stringbuffer->data);
+		string_clear(stringbuffer);
+		
+		historyptr = historyptr->next;
+		i++;
+	}
+	writeline("");
+	
+	string_free(stringbuffer); // And free stringbuffer.
 	return SIG_SUCCESS;
 }
 
