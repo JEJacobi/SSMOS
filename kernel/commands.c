@@ -11,6 +11,7 @@
 #include "output.h"
 #include "list.h"
 #include "string.h"
+#include "signal.h"
 #include "version.h"
 
 struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
@@ -30,7 +31,7 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		{ "alias", "Aliases parameters as a command, however normal commands take precedence.",
 		"alias (x) (y) - x: alias name, y: command", &alias },
 		
-		{ "cprompt", "Changes the terminal prompt the string entered.", "cprompt (x) - x: new prompt", &cprompt },
+		{ "cprompt", "Changes the terminal prompt to the string entered.", "cprompt (x) - x: new prompt", &cprompt },
 		
 		{ "syslog", "Displays the recent system log.", "syslog - no parameters", &syslog },
 		
@@ -38,9 +39,9 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
 		
-		{ "debug", "Used to trigger an external emulator debugger.", "debug - no parameters", &debug },
+		{ "debug", "Used to trigger an external debugger.", "debug - no parameters", &debug },
 		
-		{ "about", "The SSMOS about page.", "about - no parameters", &about },
+		{ "about", "The about page for SSMOS.", "about - no parameters", &about },
 		
 		{ "version", "Displays the current version of SSMOS.", "version - no parameters", &version }
 	};
@@ -161,22 +162,26 @@ int memview(char* params)
 
 int cprompt(char* params)
 {
-	extern char* prompt_string;
+	extern string* prompt_string;
 	extern size_t prompt_string_length;
+	
+	// Check to make sure there's something to change.
 	if (params != NULL && params[0] != 0x0)
 	{
-		// TODO: Dynamically allocate the prompt space, and make sure this doesn't cause an overflow.
+		// Assign the string and update the length.
+		string_set(prompt_string, params);
+		prompt_string_length = strlen(prompt_string->data);
+		return SIG_SUCCESS;
 	}
 	else
 	{
 		writeline("Invalid prompt.");
+		return SIG_FAIL;
 	}
-	return SIG_SUCCESS;
 }
 
 int cls(char* params)
 {
-	extern int prompt_x;
 	extern int prompt_y;
 
 	kclear(); // Clear the screen.
@@ -218,6 +223,11 @@ int tcolor(char* params)
 	
 	terminal_color = get_color(fg, bg); // Get the color using the parsed strings.
 	cursor_color = get_color(fg, CURSOR_BG);
+	
+	kccolor(
+		get_position(0, 0),
+		COLUMNS * ROWS,
+		terminal_color);
 	
 	string_free(foreground); string_free(background);
 	return SIG_SUCCESS;
@@ -295,7 +305,8 @@ int debug(char* params)
 
 int about(char* params)
 {
-	writeline("SSMOS - the S**** Self Made Operating System");
+	writeline("");
+	writeline("SSMOS - the Shitty Self Made Operating System");
 	writeline("");
 	writeline(VERSION);
 	writeline(COMPILE_DATE);

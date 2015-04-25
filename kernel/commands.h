@@ -16,9 +16,6 @@ struct command
 							these parameters. */
 };
 
-#define SIG_SUCCESS		0
-#define SIG_FAIL		1
-
 struct command* find_cmd(char* input);
 
 // COMMAND HANDLERS 

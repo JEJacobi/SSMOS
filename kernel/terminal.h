@@ -34,5 +34,6 @@ void handle_input();
 void parse_input();
 void draw_prompt();
 void new_prompt();
+void print_return(int retstat, char* name);
 
 #endif

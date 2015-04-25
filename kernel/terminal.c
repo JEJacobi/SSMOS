@@ -10,12 +10,13 @@
 #include "memory.h"
 #include "keyboard.h"
 #include "output.h"
+#include "signal.h"
 #include "string.h"
 
 bool prompt;
 int prompt_x;
 int prompt_y;
-char* prompt_string;
+string* prompt_string;
 size_t prompt_string_length;
 
 bool cursor;
@@ -46,8 +47,9 @@ void init_terminal()
 	terminal_color = get_color(TERMINAL_FG, TERMINAL_BG); // Set the terminal's default color.
 	
 	prompt = true; // Setup the prompt.
-	prompt_string = PROMPT_STRING;
-	prompt_string_length = strlen(PROMPT_STRING);
+	prompt_string = string_new();
+	string_set(prompt_string, PROMPT_STRING);
+	prompt_string_length = strlen(prompt_string->data);
 	
 	prompt_x = PROMPT_START_X;
 	prompt_y = PROMPT_START_Y;
@@ -161,13 +163,15 @@ void parse_input()
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
 		return_status = cmdptr->call(params->data);
-		// If the command's found, transfer to the handler function (and get any return statuses).
+		// If the command's found, transfer to the handler function.
 		
-		// TODO: Print return status.
+		print_return(return_status, cmdptr->name); // And print the return status if necessary.
 	}
 	else
 	{
 		// If not found, try looking for a file?
+		
+		// And print the return status (when files work).
 		
 		// If neither works, print an error message and return to the terminal.
 		writeline("Cannot find file or command:");
@@ -206,7 +210,7 @@ void draw_prompt()
 	{
 		kprint( // Print the prompt string first.
 			get_position(prompt_x, prompt_y),
-			prompt_string,
+			prompt_string->data,
 			terminal_color);
 		kprint( // The input buffer second.
 			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
@@ -240,4 +244,22 @@ void new_prompt()
 	cursor_x = prompt_string_length;
 	string_clear(input);
 	input_ptr = 0;
+}
+
+void print_return(int retstat, char* name)
+{
+	// If the command exited with something other than SIG_SUCCESS or SIG_FAIL, print the error number.
+	if (retstat != SIG_SUCCESS && retstat != SIG_FAIL)
+	{
+		// Assemble the string.
+		string* retmsg = string_new();
+		string_set(retmsg, name);
+		string_add(retmsg, " returned error code: ");
+		string_addnum(retmsg, retstat, 10);
+		
+		writeline(""); // Print.
+		writeline(retmsg->data);
+		
+		string_free(retmsg); // And free.
+	}
 }

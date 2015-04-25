@@ -54,6 +54,9 @@ void kccolor(int pos, int n, char color)
 		*vidptr = color; // Set the color.
 		vidptr++;
 		vidptr++; // Increment twice to the next color byte.
+		
+		if (vidptr > (volatile char*)MEM_END)
+			return;
 	}
 }
 
