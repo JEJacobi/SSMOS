@@ -29,7 +29,7 @@ char status_color;
 
 bool endterm;
 
-char* input;
+string* input;
 int input_ptr;
 
 static volatile char* cursor_ptr;
@@ -40,8 +40,7 @@ void init_terminal()
 	string_set(logmsg, "Setting up terminal...");
 	klog(logmsg); // Logging.
 	
-	input = kmalloc(TERMINAL_INPUT_SIZE); //Allocate a block to act as a command buffer.
-	*input = 0x0;
+	input = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a string to act as a command buffer.
 	input_ptr = 0;
 
 	terminal_color = get_color(TERMINAL_FG, TERMINAL_BG); // Set the terminal's default color.
@@ -99,7 +98,7 @@ void handle_input()
 		if(input_ptr > 0) // Make sure input_ptr is bigger than zero.
 		{
 			input_ptr--; // Move the pointer back to the last one.
-			input[input_ptr] = '\0'; // And clear the character input_ptr is currently pointing at.
+			input->data[input_ptr] = 0x0; // And clear the character input_ptr is currently pointing at.
 			kputchar(
 				get_position(prompt_x + prompt_string_length + input_ptr, prompt_y),
 				' ',
@@ -109,9 +108,8 @@ void handle_input()
 	else if (input_ptr < TERMINAL_INPUT_SIZE && t != 0x0) // Otherwise handle text being added (assuming it's less than max input).
 	{
 		cursor_x++;
-		input[input_ptr] = t;
+		string_addchar(input, t);
 		input_ptr++;
-		input[input_ptr] = 0x0;
 	}
 }
 
@@ -134,22 +132,22 @@ void parse_input()
 	// Separate the input buffer to the first space.
 	//
 	
-	while(input[s] != ' ' && input[s] != 0x0) // Go till a space or null-terminator is encountered.
+	while(input->data[s] != ' ' && input->data[s] != 0x0) // Go till a space or null-terminator is encountered.
 	{
-		string_addchar(cmd_string, input[s]); // Copy the string to the array.
+		string_addchar(cmd_string, input->data[s]); // Copy the string to the array.
 		s++;
 	}
 	
-	if (input[s] == 0x0)
+	if (input->data[s] == 0x0)
 		goto parse; // If there are no parameters, just jump forward to the parsing.
 		
 	// Otherwise copy them to a separate array.
 	
 	s++; // First, advance s to the space after the first space.
 	
-	while(input[s] != 0x0) // Copy till null-terminator.
+	while(input->data[s] != 0x0) // Copy till null-terminator.
 	{
-		string_addchar(params, input[s]);
+		string_addchar(params, input->data[s]);
 		s++;
 	}
 	
@@ -212,7 +210,7 @@ void draw_prompt()
 			terminal_color);
 		kprint( // The input buffer second.
 			get_position(prompt_x + prompt_string_length, prompt_y), 	// Print the buffer ahead of the prompt,
-			input,														// using the precalculated prompt_string_length.
+			input->data,														// using the precalculated prompt_string_length.
 			terminal_color);
 	}
 }
@@ -240,6 +238,6 @@ void new_prompt()
 	
 	cursor_y = prompt_y;
 	cursor_x = prompt_string_length;
+	string_clear(input);
 	input_ptr = 0;
-	kmemset(input, 0x0, TERMINAL_INPUT_SIZE);
 }
