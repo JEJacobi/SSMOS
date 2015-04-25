@@ -24,7 +24,7 @@ enum color tocolor(string* str)
 	if (strcmp(str->data, "brown") == 0)
 		return BROWN;
 	if (strcmp(str->data, "white") == 0)
-		return WHITE;
+		return LIGHT_GREY;
 	
 	// If none are found, return UNKNOWN.
 	return UNKNOWN;
