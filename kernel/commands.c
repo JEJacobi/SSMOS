@@ -3,9 +3,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "cmos.h"
 #include "date.h"
 #include "debug.h"
 #include "memory.h"
+#include "keyboard.h"
+#include "interrupts.h"
+#include "hardware.h"
 #include "terminal.h"
 #include "graphics.h"
 #include "output.h"
@@ -37,7 +41,11 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "memory", "Displays operating system memory information.", "memory - no parameters", &memory },
 		
+		{ "reboot", "Reboots the computer.", "reboot - no parameters", &reboot },
+		
 		{ "shutdown", "Stop all tasks and prepare the OS for shutdown.", "shutdown - no parameters", &shutdown },
+		
+		{ "time", "Display uptime, as well as the real time.", "time - no parameters", & time },
 		
 		{ "debug", "Used to trigger an external debugger.", "debug - no parameters", &debug },
 		
@@ -406,11 +414,48 @@ int memory(char* params)
 	return SIG_SUCCESS;
 }
 
+int reboot(char* params)
+{
+	char x = 0x02;
+	disable_interrupts();
+	
+	while (x & 0x02) // Clear keyboard buffers.
+		x = inb(KBD_CMD_PORT);
+	outb(KBD_CMD_PORT, 0xFE); // Trigger the reset pin.
+	
+	return SIG_FAIL; // This shouldn't happen, hence FAIL.
+}
+
 int shutdown(char* params)
 {
 	extern bool endterm;
 	endterm = true;
 	return SIG_SUCCESS;
+}
+
+int time(char* params)
+{
+	string* stringbuffer = string_new();
+	
+	// Assemble from CMOS RTC.
+	string_addnum(stringbuffer, CMOS_read(CMOS_CENTURY, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_YEARS, true), 10);
+	string_addchar(stringbuffer, '/');
+	string_addnum(stringbuffer, CMOS_read(CMOS_MONTHS, true), 10);
+	string_addchar(stringbuffer, '/');
+	string_addnum(stringbuffer, CMOS_read(CMOS_DAYOFMONTH, true), 10);
+	string_add(stringbuffer, " - ");
+	string_addnum(stringbuffer, CMOS_read(CMOS_HOURS, true), 10);
+	string_addchar(stringbuffer, ':');
+	string_addnum(stringbuffer, CMOS_read(CMOS_MINUTES, true), 10);
+	string_addchar(stringbuffer, ':');
+	string_addnum(stringbuffer, CMOS_read(CMOS_SECONDS, true), 10);
+	
+	writeline(""); // Write.
+	writeline(stringbuffer->data);
+	
+	string_free(stringbuffer);
+	return SIG_SUCCESS; // Free and return.
 }
 
 int debug(char* params)
