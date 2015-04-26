@@ -2,8 +2,8 @@
 
 // Most are blatantly stolen from an assembly toolkit on osdev.org.
 
-#ifndef LIB_SERIAL
-#define LIB_SERIAL
+#ifndef LIB_HARDWARE
+#define LIB_HARDWARE
 
 #include <stdbool.h>
 #include <stddef.h>

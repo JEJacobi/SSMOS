@@ -7,8 +7,10 @@
 #include <stdint.h>
 
 #include "array.h"
+#include "cmos.h"
 #include "debug.h"
 #include "list.h"
+#include "hardware.h"
 #include "string.h"
 #include "math.h"
 #include "memory.h"
