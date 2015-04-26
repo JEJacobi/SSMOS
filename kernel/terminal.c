@@ -44,6 +44,7 @@ void init_terminal()
 	klog(logmsg); // Logging.
 	
 	cmdhistory = list_new(NULL); // Initialize history list.
+	aliases = list_new(NULL); // Initialize alias list.
 	
 	input = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a string to act as a command buffer.
 	input_ptr = 0;
@@ -175,6 +176,44 @@ void parse_input()
 	
 	parse: // Yeah yeah, dirty GOTOs.
 	cmdptr = find_cmd(cmd_string->data); // Find a command with the command string gotten earlier.
+	
+	//
+	// If that fails, try looking for an alias.
+	//
+	
+	if (cmdptr == NULL)
+	{
+		struct alias* aliasptr = find_alias(cmd_string->data);
+		if (aliasptr != NULL) // If we've actually found an alias.
+		{
+			struct string* aliascmd = aliasptr->command; // Yeah this is really ugly, TODO: Refactor eventually.
+			string_clear(cmd_string); string_clear(params); // Clear the original command string and parameters.
+			int i = 0;
+			
+			while (aliascmd->data[i] != ' ' && aliascmd->data[i] != 0x0) // Parse until null-terminator or space.
+			{
+				string_addchar(cmd_string, aliascmd->data[i]); // Copy characters over to the new command string.
+				i++;
+			}
+			
+			if (aliascmd->data[i] != 0x0) // If there's more to parse, besides a single command.
+			{
+				i++;
+				while (aliascmd->data[i] != 0x0) // Copy over the rest of the command until a null terminator is reached.
+				{
+					string_addchar(params, aliascmd->data[i]);
+					i++;
+				}
+			}
+			
+			// Now that the strings are sorted out, try to find a command again.
+			cmdptr = find_cmd(cmd_string->data);
+		}
+	}
+	
+	//
+	// Finally, run a command, executable file, or print an error message.
+	//
 	
 	if(cmdptr != NULL) // Check for a null return, if so, try finding a file?
 	{
