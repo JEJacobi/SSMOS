@@ -289,7 +289,8 @@ void new_prompt()
 	
 	while (prompt_y > ROWS - 1)
 	{
-		kscroll();
+		kscroll(); // Scroll the screen.
+		kccolor(get_position(0, 0), COLUMNS * ROWS, terminal_color); // And be sure to update the colors for the new emptylines.
 		prompt_y--;
 	}
 	

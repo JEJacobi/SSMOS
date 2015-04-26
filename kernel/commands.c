@@ -241,6 +241,7 @@ int cls(char* params)
 	extern int prompt_y;
 
 	kclear(); // Clear the screen.
+	kccolor(get_position(0, 0), COLUMNS * ROWS, terminal_color); // Reset the color too.
 	prompt_y = -1; // Reset the prompt to -1, so the next newline will put the prompt on row 0.
 	
 	return SIG_SUCCESS; // And report success.
@@ -436,23 +437,32 @@ int shutdown(char* params)
 int time(char* params)
 {
 	string* stringbuffer = string_new();
+	bool bcd;
+	
+	// Check if the RTC is in binary coded decimal mode by seeing if it's the 2000's.
+	if (CMOS_read(CMOS_CENTURY, true) == CENTURY) 
+		bcd = true; // If so, be sure to convert the rest of the entries.
+	else
+		bcd = false; // If not, it's probably in flat binary, no need to convert.
 	
 	// Assemble from CMOS RTC.
-	string_addnum(stringbuffer, CMOS_read(CMOS_CENTURY, true), 10);
-	string_addnum(stringbuffer, CMOS_read(CMOS_YEARS, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_CENTURY, bcd), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_YEARS, bcd), 10);
 	string_addchar(stringbuffer, '/');
-	string_addnum(stringbuffer, CMOS_read(CMOS_MONTHS, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_MONTHS, bcd), 10);
 	string_addchar(stringbuffer, '/');
-	string_addnum(stringbuffer, CMOS_read(CMOS_DAYOFMONTH, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_DAYOFMONTH, bcd), 10);
 	string_add(stringbuffer, " - ");
-	string_addnum(stringbuffer, CMOS_read(CMOS_HOURS, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_HOURS, bcd), 10);
 	string_addchar(stringbuffer, ':');
-	string_addnum(stringbuffer, CMOS_read(CMOS_MINUTES, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_MINUTES, bcd), 10);
 	string_addchar(stringbuffer, ':');
-	string_addnum(stringbuffer, CMOS_read(CMOS_SECONDS, true), 10);
+	string_addnum(stringbuffer, CMOS_read(CMOS_SECONDS, bcd), 10);
 	
-	writeline(""); // Write.
-	writeline(stringbuffer->data);
+	if (CMOS_read(CMOS_CENTURY, bcd) != CENTURY) // Hopefully this isn't being run outside of the 2000's.
+		writeline("WARNING! Real time may not be accurate."); // Print a warning message.
+	writeline(stringbuffer->data); // Print the real time.
+	// TODO: And the uptime, calculated with the PIT.
 	
 	string_free(stringbuffer);
 	return SIG_SUCCESS; // Free and return.
