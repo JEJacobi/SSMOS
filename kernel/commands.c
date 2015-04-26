@@ -46,6 +46,8 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		{ "version", "Displays the current version of SSMOS.", "version - no parameters", &version }
 	};
 	
+struct element* aliases;
+	
 int num_commands = (sizeof commands / sizeof(struct command));
 
 struct command* find_cmd(char* input)
@@ -55,6 +57,30 @@ struct command* find_cmd(char* input)
 	{
 		if (strcmp(commands[i].name, input) == 0) // Find a string that's equal to input.
 			return &commands[i]; // If found, return a pointer to the command.
+	}
+	return NULL; // If none are found, return NULL.
+}
+
+struct alias* find_alias(char* input)
+{
+	if (get_first(aliases)->value == NULL)
+		return NULL; // Make sure there's aliases to begin with.
+	
+	struct element* elementptr = get_first(aliases);
+	struct alias* aliasptr = elementptr->value;
+	struct string* stringptr = aliasptr->alias;
+	
+	while (elementptr != NULL && aliasptr != NULL)
+	{
+		if (strcmp(stringptr->data, input) == 0) // Find an alias which string matches the input.
+			return aliasptr; // And return a pointer to the alias if found.
+			
+		elementptr = elementptr->next;
+		if (elementptr != NULL) // Increment.
+		{
+			aliasptr = elementptr->value;
+			stringptr = aliasptr->alias;
+		}
 	}
 	return NULL; // If none are found, return NULL.
 }
@@ -263,7 +289,75 @@ int tcolor(char* params)
 
 int alias(char* params)
 {
-	return SIG_SUCCESS;
+	if (params[0] == 0x0 || params[0] == ' ') // If there's no parameters, just print the current alias list.
+	{
+		struct element* elementptr = get_first(aliases);
+		struct alias* aliasptr = elementptr->value; // Set the alias pointer to the first entry.
+		string* stringbuffer = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a buffer to print aliases in.
+		string* strptr; // Get a pointer for individual strings in an alias structure.
+		
+		while (elementptr != NULL && aliasptr != NULL)
+		{	
+			// Assemble the message.
+			strptr = aliasptr->alias;
+			string_add(stringbuffer, strptr->data); 
+			string_add(stringbuffer, " is aliased to ");
+			strptr = aliasptr->command;
+			string_add(stringbuffer, strptr->data);
+			writeline(stringbuffer->data); // Print the actual message.
+			
+			// Increment the pointers.
+			elementptr = elementptr->next; 
+			if (elementptr != NULL)
+				aliasptr = elementptr->value; 
+			
+			string_clear(stringbuffer); // And clear the stringbuffer.
+		}
+		string_free(stringbuffer);
+		return SIG_SUCCESS;
+	}
+	else // Otherwise, time to parse.
+	{
+		string* newalias = string_new();
+		string* newcmd = string_new();
+		struct alias* aliasptr;
+		int i = 0;
+		
+		while (params[i] != ' ' && params[i] != 0x0) // Parse the first word to be the alias name.
+		{
+			string_addchar(newalias, params[i]);
+			i++;
+		}
+			
+		if (params[i] == 0x0)
+			goto error; // If the first word ends on a null terminator, there's no command to alias.
+		
+		i++; // Advance past the space.
+		
+		while(params[i] != 0x0) // And parse the rest of the string as a command.
+		{
+			string_addchar(newcmd, params[i]);
+			i++;
+		}
+		
+		// TODO: Find if there are any matches in the already existing alias list, and overwrite if there are.
+		
+		aliasptr = (struct alias*)kmalloc(sizeof(struct alias)); // Allocate.
+		aliasptr->alias = newalias; // Assign.
+		aliasptr->command = newcmd;
+		
+		if (get_first(aliases)->value == NULL) // Add if there's not yet any values.
+			get_first(aliases)->value = aliasptr;
+		else
+			list_add(aliases, aliasptr); // Add if there's already entries.
+		
+		return SIG_SUCCESS;
+		
+		error: // Error handling.
+			string_free(newalias); string_free(newcmd);
+			writeline("Cannot create alias.");
+			return SIG_FAIL; // Free the strings and return with a fail.
+	}
 }
 
 int syslog(char* params)

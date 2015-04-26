@@ -3,6 +3,8 @@
 #ifndef KERNEL_COMMANDS
 #define KERNEL_COMMANDS
 
+#include "string.h"
+
 struct command
 {
 	char* name;				// The name and calling string of the command.
@@ -16,7 +18,16 @@ struct command
 							these parameters. */
 };
 
+struct alias
+{
+	string* alias;
+	string* command;
+};
+
+extern struct element* aliases;
+
 struct command* find_cmd(char* input);
+struct alias* find_alias(char* input);
 
 // COMMAND HANDLERS 
 
