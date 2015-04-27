@@ -45,6 +45,9 @@ void PIC_init()
 
 void send_EOI(unsigned char irq)
 {
+	if (irq >= MASTER_PIC_OFFSET) // Check to see if the signal being sent is an IDT pointer or an actual IRQ line.
+		irq -= MASTER_PIC_OFFSET; // Subtract the PIC offset to turn it into a direct IRQ line reference.
+	
 	if(irq >= 8) // Send the EOI to the slave if needed.
 		outb(SLAVE_PIC_CMD, PIC_EOI);
 	
