@@ -25,3 +25,5 @@ Once those two are set up, extract SSMOS into your choice of folder. If you have
 `./make.sh`
 
 And for all that is good in this world, don't run SSMOS on any drive with any data you wouldn't be okay with losing.
+
+### See the [SSMOS wiki](https://github.com/Lexusjjss/SSMOS/wiki) for information on development or usage.
