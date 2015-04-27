@@ -8,6 +8,7 @@
 
 #include "array.h"
 #include "cmos.h"
+#include "pic.h"
 #include "debug.h"
 #include "list.h"
 #include "hardware.h"
@@ -47,9 +48,13 @@ char *shtdown =	" It is now safe to turn off the computer.                      
 
 void kernel_main(int bdrive, int lomem, int himem)
 {
-	interrupts_init();	// Initialize the interrupts, IDT, and PIT.
+	PIC_init();			// Initialize the 8259 PIC.
+	interrupts_init();	// Initialize the interrupts, and IDT.
 	memory_init(himem); // Initialize the heap and memory handlers.
 	graphics_init(); 	// Initialize the display stuff.
+	
+	asm volatile ("xchgw %bx, %bx");
+	
 	kclear();
 	
 	// Get the color to be used for printing, pre terminal start.

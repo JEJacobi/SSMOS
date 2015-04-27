@@ -311,6 +311,6 @@ start_kernel:
 	push dword [HIGHMEM] ; Push important things onto the stack... backwards because C.
 	push dword [LOWMEM]
 	push dword [BOOTDRIVE]
-	xchg bx, bx
+	;xchg bx, bx
 	call kernel_main ; And call kernel_main() in C land.
 jmp $ ; Hang forever on return.
