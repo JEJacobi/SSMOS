@@ -16,7 +16,6 @@
 static volatile char *vidptr;
 static char* numbuffer;
 static void* framebuffer;
-static void* memend;
 
 void graphics_init()
 {

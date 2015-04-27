@@ -4,6 +4,7 @@
 #define LIB_CMOS
 
 #include <stdbool.h>
+#include "hardware.h"
 
 // General Registers:
 #define CMOS_ADDRESS	0x70
@@ -28,5 +29,11 @@
 int CMOS_read(char reg, bool convert);	// Read a byte from a CMOS register.
 void CMOS_write(char reg, char byte);	// Write a byte to a CMOS register.
 void CMOS_sync();						// Wait for there to be no RTC updates or any flags.
+
+inline void NMI_enable()				// Enable the Non Maskable Interrupt.
+{ outb(CMOS_ADDRESS, inb(CMOS_ADDRESS) & 0x7F); }
+
+inline void NMI_disable()				// Disable the Non Maskable Interrupt. Don't do this for too long.
+{ outb(CMOS_ADDRESS, inb(CMOS_ADDRESS) | 0x80); }
 
 #endif

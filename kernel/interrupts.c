@@ -42,8 +42,7 @@ void interrupts_init()
 	
 	load_idt(); // Finally, load the IDT with the calculated size and address of the first handler.
 	
-	//TEMPORARILY OFF UNTIL PIC GETS HANDLED
-	//enable_interrupts(); // And turn them back on after the bootloader disable.
+	enable_interrupts(); // And turn them back on after the bootloader disable.
 }
 
 void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)

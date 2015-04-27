@@ -40,8 +40,8 @@ inline void outb(int port, char val)
 //
 inline void io_wait()
 {
-	asm volatile ( "jmp 1f\n\t"
-			   "1:jmp 2f\n\t"
-			   "2:" );
+	asm volatile ( 	"jmp 1f\n\t"
+					"1:jmp 2f\n\t"
+					"2:" );
 }
 #endif
