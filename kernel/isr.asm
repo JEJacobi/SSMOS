@@ -44,7 +44,7 @@ common_handle:
 ; Interrupt definitions:
 ;
 
-; Exceptions:
+; Exceptions (0x0 - 0x1F):
 no_error	0x0
 no_error	0x1
 no_error	0x2
@@ -61,8 +61,36 @@ with_error	0xC
 with_error	0xD
 with_error	0xE
 no_error	0xF
+no_error	0x10
+with_error	0x11
+no_error	0x12
+no_error	0x13
+no_error	0x14
+; -- RESERVED (0x15 - 0x1D) --
+with_error	0x1E
+; -- RESERVED (0x1F) --
 
-; System Calls:
+
+; IRQs (0x20 - 0x2F):
+no_error	0x20
+no_error	0x21
+no_error	0x22
+no_error	0x23
+no_error	0x24
+no_error	0x25
+no_error	0x26
+no_error	0x27
+no_error	0x28
+no_error	0x29
+no_error	0x2A
+no_error	0x2B
+no_error	0x2C
+no_error	0x2D
+no_error	0x2E
+no_error	0x2F
+
+
+; System Calls (0x80):
 no_error	0x80
 
 ; Function for loading the IDT given the idtptr in interrupts.c
