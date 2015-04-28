@@ -12,7 +12,7 @@ echo -n `date` >> kernel/date.h
 echo -n "\"" >> kernel/date.h
 
 CC=i686-elf-gcc
-CFLAGS="-std=gnu99 -ffreestanding -O2 -Wall -fno-optimize-sibling-calls -fno-strict-aliasing"
+CFLAGS="-std=gnu99 -ffreestanding -O1 -Wall -fno-optimize-sibling-calls -fno-strict-aliasing"
 LIB="-static -L../ -lssmos -I../lib"
 
 # Compile the system library first.

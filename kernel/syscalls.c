@@ -4,6 +4,7 @@
 
 #include "debug.h"
 #include "memory.h"
+#include "timer.h"
 #include "graphics.h"
 #include "terminal.h"
 #include "output.h"
@@ -13,7 +14,7 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 	switch(eax)
 	{
 		// sleep
-		case 0x0: 
+		case 0x0: ksleep(ebx);
 			break;
 		
 		// system

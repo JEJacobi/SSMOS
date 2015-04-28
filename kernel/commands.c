@@ -11,6 +11,7 @@
 #include "interrupts.h"
 #include "hardware.h"
 #include "terminal.h"
+#include "timer.h"
 #include "graphics.h"
 #include "output.h"
 #include "list.h"
@@ -438,6 +439,23 @@ int time(char* params)
 {
 	string* stringbuffer = string_new();
 	bool bcd;
+	int seconds, minutes, hours;
+	
+	// Calculate the uptime.
+	seconds = get_ticks() / 1000; // Get the total running seconds from the timer system.
+	minutes = seconds / 60; // Calculate the total minutes.
+	seconds = seconds % 60; // And recalculate seconds as a remainder of minutes.
+	hours = minutes / 60; // Calculate the total hours, like minutes.
+	minutes = minutes % 60; // And recalculate hours, just like seconds.
+	
+	// Print the uptime.
+	string_add(stringbuffer, "Uptime: ");
+	string_addnum(stringbuffer, hours, 10);
+	string_addchar(stringbuffer, ':');
+	string_addnum(stringbuffer, minutes, 10);
+	string_addchar(stringbuffer, ':');
+	string_addnum(stringbuffer, seconds, 10);
+	writeline(stringbuffer->data); 
 	
 	// Check if the RTC is in binary coded decimal mode by seeing if it's the 2000's.
 	if (CMOS_read(CMOS_CENTURY, true) == CENTURY) 
@@ -446,6 +464,7 @@ int time(char* params)
 		bcd = false; // If not, it's probably in flat binary, no need to convert.
 	
 	// Assemble from CMOS RTC.
+	string_clear(stringbuffer);
 	string_addnum(stringbuffer, CMOS_read(CMOS_CENTURY, bcd), 10);
 	string_addnum(stringbuffer, CMOS_read(CMOS_YEARS, bcd), 10);
 	string_addchar(stringbuffer, '/');

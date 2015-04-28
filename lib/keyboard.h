@@ -84,8 +84,11 @@ enum scancode // Massive enum of scancodes.
 	ENTER_RELEASED = 0x9C,
 };
 
+void keyboard_IRQ();
+
 enum scancode poll_scancode();
 char poll_key();
+
 void pause();
 
 char get_status();
