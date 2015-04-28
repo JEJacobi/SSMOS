@@ -374,12 +374,12 @@ int syslog(char* params)
 {
 	writeline("");
 	struct element* syslogptr = getlog();
-	string* stringbuffer;
+	string* stringbuffer = string_newsz(80);
 	
 	syslogptr = get_first(syslogptr);
 	while (syslogptr != NULL)
 	{
-		stringbuffer = syslogptr->value;
+		string_set(stringbuffer, syslogptr->value);
 		writeline(stringbuffer->data);
 		syslogptr = syslogptr->next; // Write each entry in the system log.
 	}
@@ -389,7 +389,7 @@ int syslog(char* params)
 
 int memory(char* params)
 {
-	string* buffer = string_new();
+	string* buffer = string_newsz(63);
 	string_add(buffer, "Used Memory: ");
 	string_addnum(buffer, used_memory(), 10);
 	string_add(buffer, " bytes, in ");
@@ -437,7 +437,7 @@ int shutdown(char* params)
 
 int time(char* params)
 {
-	string* stringbuffer = string_new();
+	string* stringbuffer = string_newsz(63);
 	bool bcd;
 	int seconds, minutes, hours;
 	

@@ -57,8 +57,6 @@ void kernel_main(int bdrive, int lomem, int himem)
 	
 	enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
 	
-	asm volatile ("xchgw %bx, %bx");
-	
 	kclear();
 	
 	// Get the color to be used for printing, pre terminal start.

@@ -39,9 +39,7 @@ static volatile char* cursor_ptr;
 
 void init_terminal()
 {
-	string* logmsg = string_new();
-	string_set(logmsg, "Setting up terminal...");
-	klog(logmsg); // Logging.
+	klog("Setting up terminal..."); // Logging.
 	
 	cmdhistory = list_new(NULL); // Initialize history list.
 	aliases = list_new(NULL); // Initialize alias list.
@@ -68,9 +66,7 @@ void init_terminal()
 	// And lastly, get the color for the terminal status bar.
 	status_color = get_color(STATUS_FG, STATUS_BG);
 	
-	logmsg = string_new();
-	string_set(logmsg, "Terminal initialization complete, ready to run.");
-	klog(logmsg); // More logging.
+	klog("Terminal initialization complete, ready to run."); // More logging.
 }
 
 void run_terminal()

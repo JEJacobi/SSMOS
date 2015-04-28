@@ -14,7 +14,7 @@ void haltdump(char* msg)
 	while(true) { }
 }
 
-void klog(string* msg)
+void klog(char* msg)
 {
 	if (systemlog == NULL)
 		systemlog = list_new(msg);

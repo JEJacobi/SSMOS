@@ -6,7 +6,7 @@
 #define KERNEL_DEBUG
 
 void haltdump(char* msg);	// Basically a BSOD, stop the OS and display data.
-void klog(string* msg);		// Log a kernel message (error, warning, whatever) in the system log.
+void klog(char* msg);		// Log a kernel message (error, warning, whatever) in the system log.
 struct element* getlog();	// Returns a pointer to the system log list.			
 
 #endif
