@@ -25,11 +25,7 @@ void memory_init(int heapsize)
 	string_add(logmsg, "Kernel heap initialized, ");
 	string_addnum(logmsg, (heapsize * 1024) - HEADER_SIZE, 10);
 	string_add(logmsg, " bytes found and allocated.");
-	klog(logmsg);
-	
-	// Prepare any error messages.
-	outofmem = string_new();
-	string_set(outofmem, "ERROR: Cannot allocate desired memory!");
+	klog(logmsg->data);
 }
 
 void *kmalloc(size_t size)
@@ -48,7 +44,7 @@ void *kmalloc(size_t size)
 	{
 		if (newptr->next_ptr == NULL)
 		{
-			klog(outofmem); // Log the error.
+			klog("ERROR: Cannot allocate desired memory!"); // Log the error.
 			return NULL; // No more blocks to try, return NULL.
 		}
 		newptr = newptr->next_ptr;

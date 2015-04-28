@@ -39,6 +39,8 @@
 //
 
 #define PIC_EOI				0x20	// End of interrupt signal, sent to the PIC after an IRQ interrupt.
+#define PIC_READ_IRR		0x0A	// Command to read the PIC's IRR.
+#define PIC_READ_ISR		0x0B	// Command to read the PIC's ISR.
 
 void PIC_init();
 void send_EOI(unsigned char irq);

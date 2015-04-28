@@ -27,7 +27,7 @@ void graphics_init()
 	string* logmsg = string_new();
 	string_add(logmsg, "Graphics driver initialized, framebuffer allocated at 0x");
 	string_addnum(logmsg, (int)framebuffer, 16);
-	klog(logmsg);
+	klog(logmsg->data);
 }
 
 void kclear()

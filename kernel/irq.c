@@ -9,7 +9,6 @@
 
 void process_irq(int irq)
 {
-	string* errmsg;
 	switch(irq)
 	{
 		case 0: // PIT
@@ -21,14 +20,7 @@ void process_irq(int irq)
 		case 6: // Floppy disk
 			// TODO: Add when a floppy driver is finally in.
 			break;
-		case 14: // Primary ATA
-			// TODO: Add when an ATA driver is finally in too.
-			break;
 		default: // Unsupported IRQs:
-			errmsg = string_new();
-			string_add(errmsg, "Unsupported IRQ detected! IRQ: ");
-			string_addnum(errmsg, irq, 10);
-			klog(errmsg); // Log the unsupported IRQ.
 			break;
 	}
 }
