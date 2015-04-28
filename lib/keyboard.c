@@ -6,9 +6,14 @@
 enum scancode curr_scancode;	// Current scancode.
 enum scancode last_scancode;	// Last scancode.
 
+void keyboard_IRQ()
+{
+	// TODO: Rewrite into interrupt-based driver.
+}
+
 enum scancode poll_scancode()
 {
-	//TODO: Call from poll key
+	// TODO: Call from poll key
 }
 
 char poll_key() // Slow and pretty inefficient. Temporary non-interrupt based workaround.

@@ -162,8 +162,6 @@ void interrupts_init()
 	
 	
 	load_idt(); // Finally, load the IDT with the calculated size and address of the first handler.
-	
-	enable_interrupts(); // And turn them back on after the bootloader disable.
 }
 
 void add_interrupt(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
@@ -196,11 +194,10 @@ int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int 
 	}
 	else if (num >= 0x20 && num < 0x30) // Handle PIC/IRQ mapped interrupts.
 	{
-		kprint(get_position(0, 0), "IRQ!", get_color(LIGHT_GREEN, BLACK)); // TEMP
-		kprintnum(get_position(0, 1), num, get_color(LIGHT_GREEN, BLACK), 16);
-		send_EOI(num);
-		kflip();
-		return 0;
+		num -= MASTER_PIC_OFFSET; // Convert the interrupt vector to an IRQ;
+		process_irq(num); // Handle the IRQ in the respective system.
+		send_EOI(num); // Send an End Of Interrupt signal to the PIC.
+		return 0; // And return.
 	}
 	else if (num == 0x80) // Handle aystem calls.
 	{

@@ -9,6 +9,7 @@
 #include "array.h"
 #include "cmos.h"
 #include "pic.h"
+#include "timer.h"
 #include "debug.h"
 #include "list.h"
 #include "hardware.h"
@@ -49,9 +50,12 @@ char *shtdown =	" It is now safe to turn off the computer.                      
 void kernel_main(int bdrive, int lomem, int himem)
 {
 	PIC_init();			// Initialize the 8259 PIC.
+	timer_init();		// Initialize the 8253/8254 PIT and system timer.
 	interrupts_init();	// Initialize the interrupts, and IDT.
 	memory_init(himem); // Initialize the heap and memory handlers.
 	graphics_init(); 	// Initialize the display stuff.
+	
+	enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
 	
 	asm volatile ("xchgw %bx, %bx");
 	
