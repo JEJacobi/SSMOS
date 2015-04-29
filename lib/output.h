@@ -6,7 +6,7 @@
 #include "math.h"
 #include "string.h"
 
-#define VIDEO_MEM	0xb8000	// Location of VGA video memory.
+#define VIDEO_MEM	0xB8000	// Location of VGA video memory.
 #define COLUMNS		80		// How many columns of characters.
 #define ROWS		25		// How many rows of characters.
 

@@ -7,8 +7,6 @@ unsigned long ticks = 0; // Global counter variable, increases by one every mill
 
 void timer_init()
 {
-	asm volatile ("cli");
-	
 	// Send the reinitialize byte to activate Channel 0 as a rate generator.
 	outb(PIT_COMMAND, PIT_INIT);
 	
@@ -19,7 +17,7 @@ void timer_init()
 
 void timer_IRQ()
 {
-	ticks++;
+	ticks += PIT_TICKS_MS;
 }
 
 unsigned long get_ticks()
@@ -30,7 +28,7 @@ unsigned long get_ticks()
 unsigned int get_seconds()
 {
 	// Get a rounded total of seconds.
-	return round(ticks / 1000);
+	return ticks / 1000;
 }
 
 void ksleep(int milliseconds)
