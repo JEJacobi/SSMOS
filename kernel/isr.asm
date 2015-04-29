@@ -4,6 +4,7 @@
 %macro no_error 1
 global interrupt_handler_%1
 interrupt_handler_%1:
+	push dword [BUFFER]
 	push dword 0
 	push dword %1
 	jmp common_handle
@@ -13,6 +14,7 @@ interrupt_handler_%1:
 %macro with_error 1
 global interrupt_handler_%1
 interrupt_handler_%1:
+	push dword [BUFFER]
 	push dword %1
 	jmp common_handle
 %endmacro
@@ -38,6 +40,7 @@ common_handle:
 	mov eax, [BUFFER] ; Unbuffer, and clear edx since it's the other return register.
 	xor edx, edx
 	add esp, 8 	; Restore the esp to the pre-handling state.
+	pop dword [BUFFER]
 	iret 		; And interrupt-return.
 
 ;	

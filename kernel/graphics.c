@@ -17,17 +17,16 @@ static volatile char *vidptr;
 static char* numbuffer;
 static void* framebuffer;
 
+volatile char fb[FRAMEBUFFER_SIZE];
+
 void graphics_init()
 {
-	framebuffer = kmalloc(FRAMEBUFFER_SIZE);	//Get a chunk of memory to store the video framebuffer in.
+	framebuffer = &fb;	//Get a chunk of memory to store the video framebuffer in.
 	numbuffer = kmalloc(MAX_INT_CHARS);		//Get a chunk of memory to act as a buffer for printing numbers.
 	vidptr = (volatile char*)framebuffer;
 	
 	// Log the graphics initialization.
-	string* logmsg = string_new();
-	string_add(logmsg, "Graphics driver initialized, framebuffer allocated at 0x");
-	string_addnum(logmsg, (int)framebuffer, 16);
-	klog(logmsg->data);
+	klog("Graphics driver initialized.");
 }
 
 void kclear()

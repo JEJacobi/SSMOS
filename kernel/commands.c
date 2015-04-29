@@ -437,7 +437,7 @@ int shutdown(char* params)
 
 int time(char* params)
 {
-	string* stringbuffer = string_newsz(63);
+	string* stringbuffer = string_new();
 	bool bcd;
 	int seconds, minutes, hours;
 	

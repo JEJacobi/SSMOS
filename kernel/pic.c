@@ -14,7 +14,7 @@ void PIC_init()
 	master_mask = (unsigned char)inb(MASTER_PIC_DATA);
 	slave_mask = (unsigned char)inb(SLAVE_PIC_DATA);
 	
-	master_mask = 0xFC; // Enable only the PIC and keyboard for now.
+	master_mask = 0xFA; // Enable only the PIT for now.
 	slave_mask = 0xFF; // Disable all upper interrupts. TEMP.
 	
 	// Start the init sequence. ICW1.
@@ -51,7 +51,7 @@ void send_EOI(unsigned char irq)
 	if (irq >= MASTER_PIC_OFFSET) // Check to see if the signal being sent is an IDT pointer or an actual IRQ line.
 		irq -= MASTER_PIC_OFFSET; // Subtract the PIC offset to turn it into a direct IRQ line reference.
 		
-	if (irq == 7) // Check for spurious interrupts, TODO: actually check the bit.
+	if (irq == 7) // Check for spurious interrupts.
 	{
 		asm volatile ("xchgw %bx, %bx");
 		

@@ -10,8 +10,6 @@
 //	Kernel heap memory manager.
 //
 
-string* outofmem;
-
 void memory_init(int heapsize)
 {
 	// Create a root memory header at HEAP_START.
@@ -21,16 +19,15 @@ void memory_init(int heapsize)
 	HEAP_PTR->is_free = true; // And lastly, mark it as free.
 	
 	// Log the heap initialization.
-	string* logmsg = string_new();
-	string_add(logmsg, "Kernel heap initialized, ");
-	string_addnum(logmsg, (heapsize * 1024) - HEADER_SIZE, 10);
-	string_add(logmsg, " bytes found and allocated.");
-	klog(logmsg->data);
+	klog("Kernel heap initialized.");
 }
 
 void *kmalloc(size_t size)
 {
 	struct memory_header* newptr = HEAP_PTR;
+	
+	while (size % 4 != 0)
+		size++;
 	
 	if (newptr->next_ptr == NULL && newptr->is_free == true)
 	{
@@ -45,6 +42,7 @@ void *kmalloc(size_t size)
 		if (newptr->next_ptr == NULL)
 		{
 			klog("ERROR: Cannot allocate desired memory!"); // Log the error.
+			haltdump("");
 			return NULL; // No more blocks to try, return NULL.
 		}
 		newptr = newptr->next_ptr;

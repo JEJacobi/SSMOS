@@ -9,6 +9,8 @@
 								
 #define PIT_DIV_LOW		0xA9	// The lobyte of the divider: (1010 1001)
 #define PIT_DIV_HIGH	0x4		// The hibyte of the divider: (0000 0100)
+
+#define PIT_TICKS_MS	1		// The PIT ticks at 1 tick/millisecond by default.
 								
 #define PIT_COMMAND		0x43	// The PIT command port, write-only.
 #define PIT_CHANNEL_0	0x40	// The Channel 0 data port.

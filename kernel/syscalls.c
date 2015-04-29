@@ -76,12 +76,6 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			break;
 			
 		default: // unknown or error
-			kprintnum( // TEMP
-				get_position(0, 0),
-				eax,
-				get_color(LIGHT_GREEN, BLACK),
-				16);
-			kflip();
 			haltdump("Unknown or invalid system call.");
 	}
 	return (int)NULL;
