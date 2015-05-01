@@ -9,7 +9,7 @@
 [bits 16] ; Start in 16-bit Real Mode.
 extern kernel_main
 global _start
-jmp start ; Skip the BPB.
+jmp 0x0000:start ; Skip the BPB, and ensure CS = 0.
 
 ;; FAT BIOS PARAMETER BLOCK ;;;;;;;;;;;;;;;;;
 

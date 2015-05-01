@@ -10,7 +10,7 @@ struct element* systemlog = NULL;
 void haltdump(char* msg)
 {
 	//TODO: Print registers, message, and stack to the screen. See how Linux does it, basically.
-
+	*((volatile char*)(VIDEO_MEM)) = 'X'; // TEMP
 	while(true) { }
 }
 

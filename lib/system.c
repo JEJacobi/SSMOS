@@ -1,5 +1,7 @@
 #include "system.h"
 
+#include "output.h" // TEMP
+
 // Wrappers for system calls.
 
 /*
@@ -13,21 +15,23 @@ NOTES:
 
 void *malloc(size_t size)
 {
-	void* ptr;
-	asm volatile("movl $0x3, %%eax; int $0x80"
-				:"=a"(ptr)	// Output ptr in eax.
-				:"b"(size)	// Input through ebx.
-				:"ecx", "edx", "memory");	
+	void* ptr = NULL;
+	while(ptr == NULL) // TEMP
+		asm volatile("movl $0x3, %%eax; int $0x80"
+					:"=a"(ptr)	// Output ptr in eax.
+					:"b"(size)	// Input through ebx.
+					:"ecx", "edx", "memory");
 	return ptr;
 }
 
 void *realloc(void *ptr, size_t newsz)
 {
-	void* newptr;
-	asm volatile("movl $0x4, %%eax; int $0x80"
-				:"=a"(newptr)
-				:"b"(ptr), "c"(newsz)
-				:"edx", "memory"); 
+	void* newptr = NULL;
+	while(newptr == NULL) // TEMP
+		asm volatile("movl $0x4, %%eax; int $0x80"
+					:"=a"(newptr)
+					:"b"(ptr), "c"(newsz)
+					:"edx", "memory"); 
 				// Inputs are the old pointer in ebx, and the new desired size in ecx.
 	return newptr;
 }

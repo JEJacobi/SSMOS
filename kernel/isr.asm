@@ -30,17 +30,21 @@ global interrupt_handler_%1
 BUFFER: dd 0x0
 
 common_handle:
+	cli
+	pushfd		; Save EFLAGS
 	pushad		; Save all registers.
 	cld			; Clear DF because of the System V ABI.
 	extern interrupt_handler
 	call interrupt_handler ; And transfer to C-land handler.
 	mov [BUFFER], eax ; Buffer the return value around popad.
 	;xchg bx, bx
-	popad
+	popad		; Restore registers and EFLAGS.
+	popfd
 	mov eax, [BUFFER] ; Unbuffer, and clear edx since it's the other return register.
 	xor edx, edx
 	add esp, 8 	; Restore the esp to the pre-handling state.
 	pop dword [BUFFER]
+	sti
 	iret 		; And interrupt-return.
 
 ;	
