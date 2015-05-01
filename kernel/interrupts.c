@@ -183,13 +183,11 @@ bool check_interrupts_enabled()
     return flags & (1 << 9);
 }
 
-int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int err)
+int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int eflags, int num, int err)
 {	
 	if (num >= 0x0 && num < 0x20) // Handle exceptions.
 	{
-		kprint(get_position(0, 0), "EXCEPTION!", get_color(LIGHT_GREEN, BLACK)); // TEMP
-		kprintnum(get_position(0, 1), num, get_color(LIGHT_GREEN, BLACK), 16);
-		kflip();
+		haltdump("EXCEPTION!"); // TEMP
 		return 0;
 	}
 	else if (num >= 0x20 && num < 0x30) // Handle PIC/IRQ mapped interrupts.

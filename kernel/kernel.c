@@ -55,7 +55,7 @@ void kernel_main(int bdrive, int lomem, int himem)
 	PIC_init();			// Initialize the 8259 PIC.
 	timer_init();		// Initialize the 8253/8254 PIT and system timer.
 	
-	enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
+	//enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
 	
 	kclear();
 	

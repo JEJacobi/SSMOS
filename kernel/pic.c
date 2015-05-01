@@ -14,7 +14,7 @@ void PIC_init()
 	master_mask = (unsigned char)inb(MASTER_PIC_DATA);
 	slave_mask = (unsigned char)inb(SLAVE_PIC_DATA);
 	
-	master_mask = 0xFA; // Enable only the PIT for now.
+	master_mask = 0xFE; // Enable only the PIT for now.
 	slave_mask = 0xFF; // Disable all upper interrupts. TEMP.
 	
 	// Start the init sequence. ICW1.
@@ -53,8 +53,6 @@ void send_EOI(unsigned char irq)
 		
 	if (irq == 7) // Check for spurious interrupts.
 	{
-		asm volatile ("xchgw %bx, %bx");
-		
 		outb(MASTER_PIC_CMD, PIC_READ_IRR);
 		char irr = inb(MASTER_PIC_CMD); // Get the IRR from the PIC, to see if it's spurious.
 		

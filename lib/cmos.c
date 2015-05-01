@@ -15,7 +15,7 @@ int CMOS_read(char reg, bool convert)
 	io_wait();
 	// TODO: Wait for flag/delay/sleep/something.
 	ret = inb(CMOS_DATA); // And read the data.
-	asm volatile ("sti"); // TODO: Uncomment when interrupts are mapped.
+	//asm volatile ("sti");
 	
 	if (convert) // Convert from BCD if desired.
 		ret = ((ret / 16) * 10) + (ret & 0xF);

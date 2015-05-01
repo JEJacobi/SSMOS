@@ -17,6 +17,7 @@ void timer_init()
 
 void timer_IRQ()
 {
+	asm volatile("xchgw %bx, %bx");
 	ticks += PIT_TICKS_MS;
 }
 
