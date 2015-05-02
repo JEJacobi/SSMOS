@@ -16,20 +16,22 @@ NOTES:
 void *malloc(size_t size)
 {
 	void* ptr = NULL;
-	asm volatile("movl $0x3, %%eax; int $0x80"
-				:"=a"(ptr)	// Output ptr in eax.
-				:"b"(size)	// Input through ebx.
-				:"ecx", "edx", "esi", "edi", "cc", "memory");
+	while (ptr == NULL)
+		asm volatile("movl $0x3, %%eax; int $0x80"
+					:"=a"(ptr)	// Output ptr in eax.
+					:"b"(size)	// Input through ebx.
+					:"ecx", "edx", "esi", "edi", "cc", "memory");
 	return ptr;
 }
 
 void *realloc(void *ptr, size_t newsz)
 {
 	void* newptr = NULL;
-	asm volatile("movl $0x4, %%eax; int $0x80"
-				:"=a"(newptr)
-				:"b"(ptr), "c"(newsz)
-				:"edx", "esi", "edi", "cc", "memory"); 
+	while (newptr == NULL)
+		asm volatile("movl $0x4, %%eax; int $0x80"
+					:"=a"(newptr)
+					:"b"(ptr), "c"(newsz)
+					:"edx", "esi", "edi", "cc", "memory"); 
 	// Inputs are the old pointer in ebx, and the new desired size in ecx.
 	return newptr;
 }

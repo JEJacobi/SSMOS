@@ -135,6 +135,9 @@ void parse_input()
 	string* params = string_new(); // String to store the rest of the input buffer (parameters) in.	
 	string* historystr = string_new(); // String to store the executed text and link to the history list.
 	
+	if (cmd_string == NULL || params == NULL || historystr == NULL)
+		haltdump("MEMORY ERROR! Cannot allocate space for terminal");
+	
 	//
 	// Handle command history:
 	//

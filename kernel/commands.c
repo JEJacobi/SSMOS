@@ -453,7 +453,7 @@ int time(char* params)
 	minutes = minutes % 60; // And recalculate hours, just like seconds.
 	
 	// Print the uptime.
-	string_add(stringbuffer, "Uptime: ");
+	string_set(stringbuffer, "Uptime: ");
 	string_addnum(stringbuffer, hours, 10);
 	string_addchar(stringbuffer, ':');
 	string_addnum(stringbuffer, minutes, 10);
@@ -468,7 +468,7 @@ int time(char* params)
 		bcd = false; // If not, it's probably in flat binary, no need to convert.
 	
 	// Assemble from CMOS RTC.
-	string_clear(stringbuffer);
+	string_set(stringbuffer, "Date/Time: ");
 	string_addnum(stringbuffer, CMOS_read(CMOS_CENTURY, bcd), 10);
 	string_addnum(stringbuffer, CMOS_read(CMOS_YEARS, bcd), 10);
 	string_addchar(stringbuffer, '/');

@@ -31,6 +31,10 @@
 *.bin
 *.bxrc
 
+# Image files:
+*.img
+*.iso
+
 # Debug files
 *.dSYM/
 
@@ -40,3 +44,4 @@ dump/
 # Generated files:
 kernel/date.h
 *.~lock*
+
