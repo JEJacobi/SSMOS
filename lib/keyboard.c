@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include "hardware.h"
 
-enum scancode curr_scancode;	// Current scancode.
-enum scancode last_scancode;	// Last scancode.
+volatile enum scancode curr_scancode;	// Current scancode.
+volatile enum scancode last_scancode;	// Last scancode.
 
 void keyboard_IRQ()
 {

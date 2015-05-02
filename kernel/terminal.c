@@ -44,6 +44,9 @@ void init_terminal()
 	cmdhistory = list_new(NULL); // Initialize history list.
 	aliases = list_new(NULL); // Initialize alias list.
 	
+	if (cmdhistory == NULL || aliases == NULL)
+		haltdump("FATAL ERROR! Cannot allocate required space for terminal.");
+	
 	input = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a string to act as a command buffer.
 	input_ptr = 0;
 

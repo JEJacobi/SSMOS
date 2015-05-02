@@ -14,7 +14,7 @@ void PIC_init()
 	master_mask = (unsigned char)inb(MASTER_PIC_DATA);
 	slave_mask = (unsigned char)inb(SLAVE_PIC_DATA);
 	
-	master_mask = 0xFE; // Enable only the PIT for now.
+	master_mask = 0xFC; // Enable only the PIT and keyboard for now.
 	slave_mask = 0xFF; // Disable all upper interrupts. TEMP.
 	
 	// Start the init sequence. ICW1.
