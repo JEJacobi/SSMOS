@@ -14,6 +14,9 @@ char* numbuffer;
 
 size_t strlen(char *str)
 {
+	if (str == NULL)
+		return 0;
+	
 	int len = 0;
 	while (*str != 0x0)
 	{
@@ -25,6 +28,9 @@ size_t strlen(char *str)
 
 void strcpy(char* dest, char *src)
 {
+	if (dest == NULL || src == NULL)
+		return;
+	
 	char* x = dest;
 	char* y = src;
 	
@@ -38,6 +44,9 @@ void strcpy(char* dest, char *src)
 
 char *strcat(char *dest, char *src)
 {
+	if (dest == NULL || src == NULL)
+		return NULL;
+	
 	char* x = dest;
 	char* y = src;
 	
@@ -56,6 +65,9 @@ char *strcat(char *dest, char *src)
 
 char *strncat(char *dest, char *src, size_t n)
 {
+	if (dest == NULL || src == NULL || n < 1)
+		return dest;
+	
 	int i;
 	char* x = dest;
 	char* y = src;
@@ -100,6 +112,9 @@ int strcmp(char *str1, char *str2)
 
 void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offshoot thing.
 {
+	if (begin == NULL || end == NULL)
+		return;
+	
 	char x;
 	
 	while (end > begin) // Swap characters using x as a buffer.
@@ -108,6 +123,9 @@ void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offs
 
 void toupper(char *str)
 {
+	if (str == NULL)
+		return;
+	
 	while (*str != 0x0) // Go until null-terminator.
 	{
 		if (*str <= 122 && *str >= 97) // Lowercase ranges from 97-122.
@@ -119,6 +137,9 @@ void toupper(char *str)
 
 void tolower(char *str)
 {
+	if (str == NULL)
+		return;
+	
 	while (*str != 0x0) // Go until null-terminator.
 	{
 		if (*str <= 90 && *str >= 65) // Uppercase ranges from 65-90.
@@ -140,6 +161,9 @@ double todbl(char *str)
 
 void tostring(int val, char* dest, int base) // Shamelessly modified from a modification of K&R itoa.
 {
+	if (dest == NULL)
+		return;
+	
 	static char num[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char* buffer = dest;
 	int sign;
@@ -192,12 +216,18 @@ string* string_newsz(size_t init)
 
 void string_free(string* str)
 {
+	if (str == NULL)
+		return;
+	
 	free(str->data);
 	free(str);
 }
 
 string* string_fromchar(char* data)
 {
+	if (data == NULL)
+		return NULL;
+	
 	string* newstr = string_new(strlen(data)); // Allocate the space needed for the message.
 	strcpy(newstr->data, data); // Copy the existing message.
 	return newstr; // And return the new string.
@@ -205,6 +235,9 @@ string* string_fromchar(char* data)
 
 void string_add(string* str, char* data)
 {
+	if (str == NULL || data == NULL)
+		return;
+	
 	// String buffer must have enough space for both char*'s and a null terminator.
 	if (str->size < strlen(str->data) + strlen(data) + 1)
 		string_resize(str, strlen(str->data) + strlen(data)); // Resize to fit.
@@ -214,6 +247,9 @@ void string_add(string* str, char* data)
 
 void string_addchar(string* str, char c)
 {
+	if (str == NULL)
+		return;
+	
 	if (str->size <= strlen(str->data) + 2) // Only adding one character, no need to strlen the message.
 		string_resize(str, str->size + 1); // Resize if necessary.
 	
@@ -227,6 +263,9 @@ void string_addchar(string* str, char c)
 
 void string_addnum(string* str, int num, int base)
 {
+	if (str == NULL)
+		return;
+	
 	if (numbuffer == NULL)
 		numbuffer = (char*)malloc(MAX_INT_CHARS);
 	tostring(num, numbuffer, base);
@@ -235,6 +274,9 @@ void string_addnum(string* str, int num, int base)
 
 void string_set(string* str, char* data)
 {
+	if (str == NULL || data == NULL)
+		return;
+	
 	if(strlen(data) + 1 > str->size) // If the new message is larger than the current capacity...
 		string_resize(str, strlen(data)); // Expand the string's buffer to fit if needed.
 		
@@ -243,11 +285,17 @@ void string_set(string* str, char* data)
 
 void string_trim(string* str)
 {
+	if (str == NULL)
+		return;
+	
 	string_resize(str, str->size - string_padding(str)); // Resize the string to have no padding space.
 }
 
 void string_clear(string* str)
 {
+	if (str == NULL)
+		return;
+	
 	int i;
 	
 	for (i = 0; i < str->size; i++)
@@ -258,6 +306,9 @@ void string_clear(string* str)
 
 void string_resize(string* str, size_t newsz)
 {
+	if (str == NULL || newsz < 0)
+		return;
+	
 	size_t oldsz = str->size; // Temporarily store the old size.
 	newsz++; // Take into account the null terminator.
 	// Reallocate the block and update the pointer. Realloc also takes care of copying data over.
@@ -272,10 +323,16 @@ void string_resize(string* str, size_t newsz)
 
 int string_padding(string* str)
 {
+	if (str == NULL)
+		return -1;
+	
 	return str->size - (strlen(str->data) + 1); // Return however many bytes are leftover in the allocated space.
 }
 
 int string_used(string* str)
 {
+	if (str == NULL)
+		return -1;
+	
 	return str->size - string_padding(str);
 }

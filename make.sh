@@ -12,7 +12,7 @@ echo -n `date` >> kernel/date.h
 echo -n "\"" >> kernel/date.h
 
 CC=i686-elf-gcc
-CFLAGS="-std=gnu99 -ffreestanding -Og -Wall -fno-optimize-sibling-calls -fno-strict-aliasing -fno-delete-null-pointer-checks"
+CFLAGS="-std=gnu99 -nostdlib -ffreestanding -Og -Wall -fno-exceptions -mno-red-zone -fno-optimize-sibling-calls -fno-strict-aliasing -fno-delete-null-pointer-checks"
 LIB="-static -L../ -lssmos -I../lib"
 
 # Compile the system library first.
@@ -35,4 +35,4 @@ nasm -felf32 ../kernel/*.asm
 mv ../kernel/*.o .
 
 # And glue it all together.
-$CC -o ../ssmos.bin boot.bin *.o -ffreestanding -Ttext 0x7C00 -Wl,--oformat=binary -nostdlib -lgcc -O2 -I../kernel $LIB
+$CC -o ../ssmos.bin boot.bin *.o -Ttext 0x7C00 -Wl,--oformat=binary $CFLAGS -lgcc -I../kernel $LIB

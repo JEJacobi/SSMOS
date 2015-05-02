@@ -19,6 +19,8 @@
 #include "signal.h"
 #include "version.h"
 
+#include "system.h" // TEMP
+
 struct command commands[] = // List of built in command structs, their ID's, help strings, and function pointers:
 	{
 		{ "help", "Get a list of commands, or more specific information like you're doing now.",
@@ -239,6 +241,7 @@ int cprompt(char* params)
 
 int cls(char* params)
 {
+	asm volatile("xchgw %bx, %bx");
 	extern int prompt_y;
 
 	kclear(); // Clear the screen.
@@ -437,6 +440,7 @@ int shutdown(char* params)
 
 int time(char* params)
 {
+	asm volatile("xchgw %bx, %bx");
 	string* stringbuffer = string_new();
 	bool bcd;
 	int seconds, minutes, hours;
@@ -489,6 +493,14 @@ int time(char* params)
 
 int debug(char* params)
 {
+	asm volatile ("xchgw %bx, %bx");
+	
+	// TEMP
+	void* tempmem = malloc(18);
+	asm volatile ("xchgw %bx, %bx");
+	tempmem = realloc(tempmem, 40);
+	asm volatile ("xchgw %bx, %bx");
+	free(tempmem);
 	asm volatile ("xchgw %bx, %bx");
 	return SIG_SUCCESS;
 }

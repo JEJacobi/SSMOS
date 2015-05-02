@@ -16,23 +16,21 @@ NOTES:
 void *malloc(size_t size)
 {
 	void* ptr = NULL;
-	while(ptr == NULL) // TEMP
-		asm volatile("movl $0x3, %%eax; int $0x80"
-					:"=a"(ptr)	// Output ptr in eax.
-					:"b"(size)	// Input through ebx.
-					:"ecx", "edx", "memory");
+	asm volatile("movl $0x3, %%eax; int $0x80"
+				:"=a"(ptr)	// Output ptr in eax.
+				:"b"(size)	// Input through ebx.
+				:"ecx", "edx", "esi", "edi", "cc", "memory");
 	return ptr;
 }
 
 void *realloc(void *ptr, size_t newsz)
 {
 	void* newptr = NULL;
-	while(newptr == NULL) // TEMP
-		asm volatile("movl $0x4, %%eax; int $0x80"
-					:"=a"(newptr)
-					:"b"(ptr), "c"(newsz)
-					:"edx", "memory"); 
-				// Inputs are the old pointer in ebx, and the new desired size in ecx.
+	asm volatile("movl $0x4, %%eax; int $0x80"
+				:"=a"(newptr)
+				:"b"(ptr), "c"(newsz)
+				:"edx", "esi", "edi", "cc", "memory"); 
+	// Inputs are the old pointer in ebx, and the new desired size in ecx.
 	return newptr;
 }
 
@@ -41,7 +39,7 @@ void free(void *ptr)
 	asm volatile("movl $0x5, %%eax; int $0x80"
 				: // No return value from free.
 				:"b"(ptr) // Only input is the old pointer to free in ebx.
-				:"%eax", "ecx", "edx", "memory");
+				:"%eax", "ecx", "edx", "cc", "memory");
 }
 
 void memcpy(void *dest, const void *src, size_t sz)
@@ -49,7 +47,7 @@ void memcpy(void *dest, const void *src, size_t sz)
 	asm volatile("movl $0x6, %%eax; int $0x80"
 				:
 				:"b"(dest), "c"(src), "d"(sz)
-				:"eax");
+				:"eax", "cc", "memory");
 }
 
 void memset(void *dest, char c, size_t sz)
@@ -57,7 +55,7 @@ void memset(void *dest, char c, size_t sz)
 	asm volatile("movl $0x7, %%eax; int $0x80"
 				:
 				:"b"(dest), "c"(c), "d"(sz)
-				:"eax");
+				:"eax", "cc", "memory");
 }
 
 void sleep(int x)
@@ -79,7 +77,7 @@ int system(const char *command)
 
 void clear()
 {
-	asm volatile("movl $0x2, %%eax; int $0x80" : );
+	asm volatile("movl $0x2, %%eax; int $0x80" : : : "eax");
 }
 
 void ccolor(int pos, int n, char color)
@@ -119,15 +117,15 @@ void printnum(int pos, int num, char color, int base)
 
 void scroll()
 {
-	asm volatile("movl $0xD, %%eax; int $0x80" : );
+	asm volatile("movl $0xD, %%eax; int $0x80" : : :"eax");
 }
 
 void flip()
 {
-	asm volatile("movl $0xE, %%eax; int $0x80" : );
+	asm volatile("movl $0xE, %%eax; int $0x80" : : :"eax");
 }
 
 void sync()
 {
-	asm volatile("movl $0xF, %%eax; int $0x80" : );
+	asm volatile("movl $0xF, %%eax; int $0x80" : : :"eax");
 }

@@ -13,9 +13,9 @@
 #define FRAMEBUFFER_SIZE		(COLUMNS * ROWS * 2)			// The size of the framebuffer (columns * rows * 2 bytes)
 #define MEM_END					framebuffer + FRAMEBUFFER_SIZE 	// The pointer to the end of video memory.
 
-static volatile char *vidptr;
-static char* numbuffer;
-static void* framebuffer;
+volatile char *vidptr;
+char* numbuffer;
+void* framebuffer;
 
 volatile char fb[FRAMEBUFFER_SIZE];
 
@@ -31,13 +31,8 @@ void graphics_init()
 
 void kclear()
 {
-	for( //Clear the video memory, color presets as well.
-		vidptr = (volatile char*)framebuffer; 
-		vidptr < (volatile char*)MEM_END;
-		vidptr++)
-	{
-		*vidptr = 0x0; //Just overwrite everything with NULs.
-	}
+	//Clear the video memory, color presets as well.
+	kmemset(framebuffer, 0x0, FRAMEBUFFER_SIZE);
 }
 
 void kccolor(int pos, int n, char color)

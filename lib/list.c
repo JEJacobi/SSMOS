@@ -8,6 +8,8 @@
 struct element* list_new(void* init_val)
 {
 	struct element* newlist = malloc(sizeof(struct element));
+	if (newlist == NULL)
+		return NULL;
 	newlist->value = init_val;
 	newlist->next = NULL;
 	newlist->prev = NULL;
@@ -16,6 +18,9 @@ struct element* list_new(void* init_val)
 
 void list_delete(struct element* list)
 {
+	if (list == NULL)
+		return;
+	
 	list = get_first(list);
 	
 	while (list->next != NULL) // Loop until there are no more elements.
@@ -28,6 +33,9 @@ void list_delete(struct element* list)
 
 void list_add(struct element* list, void* val)
 {
+	if (list == NULL)
+		return;
+	
 	list = get_last(list); // Set list to the last element.
 		
 	struct element* newelem = malloc(sizeof(struct element)); // Allocate space for the element.
@@ -39,6 +47,9 @@ void list_add(struct element* list, void* val)
 
 void list_addat(struct element* list, void* val, int index)
 {
+	if (list == NULL)
+		return;
+	
 	struct element* prev = get_at(list, index); // First, get a pointer to the indexed item.
 	struct element* next = prev->next; // And a pointer to the item after that.
 	
@@ -56,6 +67,9 @@ void list_addat(struct element* list, void* val, int index)
 
 void list_addfirst(struct element* list, void* val)
 {
+	if (list == NULL)
+		return;
+	
 	list = get_first(list);
 		
 	struct element* newelem = malloc(sizeof(struct element));
@@ -66,6 +80,9 @@ void list_addfirst(struct element* list, void* val)
 
 void list_remove(struct element* item)
 {
+	if (item == NULL)
+		return;
+	
 	// Get pointers to the elements around item.
 	struct element* prev = item->prev;
 	struct element* next = item->next;
@@ -79,16 +96,32 @@ void list_remove(struct element* item)
 
 void list_removeat(struct element* list, int index)
 {
+	if (list == NULL)
+		return; // Error checking.
+	
+	if (index < 0)
+		index = 0;
+	
+	if (index > list_count(list) - 1)
+		index = list_count(list) - 1;
+	
+	
 	list_remove(get_at(list, index));
 }
 
 void list_removelast(struct element* list)
 {
+	if (list == NULL)
+		return; // More error checking.
+	
 	list_remove(get_last(list));
 }
 
 int list_count(struct element* list)
 {
+	if (list == NULL)
+		return 0;
+	
 	int c = 1; // Initial list element.
 	struct element* ptr;
 	ptr = list;
@@ -119,6 +152,9 @@ void list_sort(struct element* list, int (*compare)(const void *, const void *))
 
 struct element* get_first(struct element* list)
 {
+	if (list == NULL)
+		return NULL;
+	
 	while (list->prev != NULL)
 		list = list->prev;	
 	return list;
@@ -126,6 +162,9 @@ struct element* get_first(struct element* list)
 
 struct element* get_last(struct element* list)
 {
+	if (list == NULL)
+		return NULL;
+	
 	while (list->next != NULL)
 		list = list->next;
 	return list;
@@ -133,6 +172,9 @@ struct element* get_last(struct element* list)
 
 struct element* get_at(struct element* list, int index)
 {
+	if (list == NULL)
+		return NULL;
+	
 	if (index < 0 || index > list_count(list))
 		return NULL; // Error check, make sure index isn't negative or out of bounds.
 

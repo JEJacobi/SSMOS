@@ -3,7 +3,7 @@
 #include "hardware.h"
 #include "math.h"
 
-unsigned long ticks = 0; // Global counter variable, increases by one every millisecond.
+unsigned long volatile ticks = 0; // Global counter variable, increases by one every millisecond.
 
 void timer_init()
 {
@@ -17,7 +17,6 @@ void timer_init()
 
 void timer_IRQ()
 {
-	asm volatile("xchgw %bx, %bx");
 	ticks += PIT_TICKS_MS;
 }
 
