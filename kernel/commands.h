@@ -37,7 +37,6 @@ int history(char* params);	// Display command history.
 int list(char* params);		// List files in a specified directory.
 int find(char* params);		// Finds any files with the string indicated on the disk.
 int edit(char* params);		// Basic ASCII text editor.
-int hexedit(char* params);	// Basic hex editor.
 
 int makedir(char* params);	// Creates directories indicated.
 int copy(char* params);		// Copies file(s) to the location indicated.
@@ -52,6 +51,7 @@ int cls(char* params);		// Clear the screen.
 int tcolor(char* params);	// Sets the terminal's color and refreshes the screen.
 int alias(char* params);	// Alias a string as a command.
 int cprompt(char* params);	// Change the command prompt to what's entered.
+int cpuinfo(char* params);	// Display available hardware information.
 int syslog(char* params);	// Displays the system log.
 int memory(char* params);	// Displays operating system memory information.
 int reboot(char* params);	// Reboot the computer.

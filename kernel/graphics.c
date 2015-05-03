@@ -150,11 +150,6 @@ void kflip()
 			//Copy the framebuffer to VIDEO_MEM, flipping the buffer onto active memory.
 }
 
-void ksync()
-{
-	// Will need timers/IRQ? working.
-}
-
 void set_vidptr(int pos)
 {
 	// Set the video pointer to the offset given, plus the generated framebuffer.

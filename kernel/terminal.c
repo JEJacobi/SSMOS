@@ -12,6 +12,7 @@
 #include "output.h"
 #include "signal.h"
 #include "string.h"
+#include "timer.h"
 
 bool prompt;
 int prompt_x;

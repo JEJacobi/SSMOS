@@ -19,14 +19,6 @@ interrupt_handler_%1:
 	jmp common_handle
 %endmacro
 
-;; IRQ MACRO;;
-%macro IRQ 2
-global interrupt_handler_%1
-
-; TODO
-
-%endmacro
-
 BUFFER: dd 0x0
 
 common_handle:
