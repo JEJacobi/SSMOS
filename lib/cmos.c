@@ -30,7 +30,7 @@ void CMOS_write(char reg, char byte)
 	asm volatile ("cli");
 	outb(CMOS_ADDRESS, reg); // First pick a register.
 	outb(CMOS_DATA, byte); // Then write the byte.
-	asm volatile ("sti"); // TODO: Uncomment when interrupts are mapped.
+	asm volatile ("sti");
 }
 
 void CMOS_sync()

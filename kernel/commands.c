@@ -40,6 +40,8 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "cprompt", "Changes the terminal prompt to the string entered.", "cprompt (x) - x: new prompt", &cprompt },
 		
+		{ "cpuinfo", "Display known CPU information, features, and instruction sets.", "hardware - no parameters", &cpuinfo},
+		
 		{ "syslog", "Displays the recent system log.", "syslog - no parameters", &syslog },
 		
 		{ "memory", "Displays operating system memory information.", "memory - no parameters", &memory },
@@ -122,14 +124,40 @@ int help(char* params)
 	else
 	{
 		// Otherwise print the list.
-		// TODO: Either implement some kind of pause when scroll is needed, or make displaying the list more efficient.
-		int i;
+		int i = 0;
+		bool linecomplete = false;
+		string* stringbuffer = string_newsz(80);
+		
+		if (stringbuffer == NULL)
+			return ERR_OUT_OF_MEMORY;
 		
 		writeline("Commands (type help COMMAND for more information):"); // Print a simple header.
 		writeline("");
 		
-		for (i = 0; i < num_commands; i++) // Iterate through the command list.
-			writeline(commands[i].name);
+		while (i <= num_commands) // Iterate through the command list, displaying them in columns.
+		{
+			if (linecomplete) // Only print the line when the buffer is built up.
+			{
+				writeline(stringbuffer->data);
+				string_set(stringbuffer, commands[i].name);
+				linecomplete = false; // Reset the complete flag.
+				i++;
+			}
+			else
+			{
+				while (strlen(stringbuffer->data) <= 60) // Add commands onto the line until there's no more space.
+				{
+					while (strlen(stringbuffer->data) % 20 != 0) 
+						string_addchar(stringbuffer, ' '); // Space out into 20-character columns.
+					
+					if (i >= num_commands) // Stop if there are no more to add.
+						break;
+					string_add(stringbuffer, commands[i++].name);
+				}
+				linecomplete = true; // And mark the line as complete once there's no more space.
+			}
+		}
+		string_free(stringbuffer);
 	}
 	new_prompt();
 	return SIG_SUCCESS;
@@ -175,11 +203,6 @@ int find(char* params)
 }
 
 int edit(char* params)
-{
-	return SIG_SUCCESS;
-}
-
-int hexedit(char* params)
 {
 	return SIG_SUCCESS;
 }
@@ -373,6 +396,90 @@ int alias(char* params)
 	}
 }
 
+int cpuinfo(char* params)
+{
+	unsigned int eax = 0;
+	unsigned int ebx = 0;
+	unsigned int ecx = 0;
+	unsigned int edx = 0;
+	string* stringbuffer = string_newsz(127);
+	
+	if (stringbuffer == NULL)
+		return ERR_OUT_OF_MEMORY;
+	
+	asm volatile("cpuid" // Get the CPUID with eax = 0, or the vendor string.
+				:"=b"(ebx), "=c"(ecx), "=d"(edx)
+				:"a"(eax));
+				
+	string_set(stringbuffer, "CPU Vendor: "); // Get the CPU vendor string out of ebx, ecx, and edx.
+	string_addchar(stringbuffer, ((ebx >> (8 * 0)) & 0xff)); // Really ugly, but basically all just bitshifts.
+	string_addchar(stringbuffer, ((ebx >> (8 * 1)) & 0xff));
+	string_addchar(stringbuffer, ((ebx >> (8 * 2)) & 0xff));
+	string_addchar(stringbuffer, ((ebx >> (8 * 3)) & 0xff));
+	string_addchar(stringbuffer, ((edx >> (8 * 0)) & 0xff));
+	string_addchar(stringbuffer, ((edx >> (8 * 1)) & 0xff));
+	string_addchar(stringbuffer, ((edx >> (8 * 2)) & 0xff));
+	string_addchar(stringbuffer, ((edx >> (8 * 3)) & 0xff));
+	string_addchar(stringbuffer, ((ecx >> (8 * 0)) & 0xff));
+	string_addchar(stringbuffer, ((ecx >> (8 * 1)) & 0xff));
+	string_addchar(stringbuffer, ((ecx >> (8 * 2)) & 0xff));
+	string_addchar(stringbuffer, ((ecx >> (8 * 3)) & 0xff));
+	
+	writeline(stringbuffer->data);
+	writeline("");
+	
+	// TODO: Find out CPU speed?
+	
+	eax = 1;
+	ebx = 0;
+	ecx = 0;
+	edx = 0;
+	
+	asm volatile("cpuid" // Next, get the CPUID with eax = 1, the features flags.
+				:"=b"(ebx), "=c"(ecx), "=d"(edx)
+				:"a"(eax));
+				
+	writeline("Detected Features:");	
+	string_clear(stringbuffer); // Detect and print CPU features.
+	if (check_bit(edx, 0))
+		string_add(stringbuffer, "fpu ");
+	if (check_bit(edx, 1))
+		string_add(stringbuffer, "vme ");
+	if (check_bit(edx, 3))
+		string_add(stringbuffer, "pse ");
+	if (check_bit(edx, 4))
+		string_add(stringbuffer, "tsc ");
+	if (check_bit(edx, 6))
+		string_add(stringbuffer, "pae ");
+	if (check_bit(edx, 9))
+		string_add(stringbuffer, "apic ");
+	if (check_bit(edx, 28))
+		string_add(stringbuffer, "htt ");
+	if (check_bit(edx, 30))
+		string_add(stringbuffer, "ia64 ");
+	writeline(stringbuffer->data);
+	
+	writeline("Instruction Sets:");
+	string_clear(stringbuffer); // Detect and print CPU instruction sets.
+	if (check_bit(edx, 23))
+		string_add(stringbuffer, "mmx ");
+	if (check_bit(edx, 25))
+		string_add(stringbuffer, "sse ");
+	if (check_bit(edx, 26))
+		string_add(stringbuffer, "sse2 ");
+	if (check_bit(ecx, 0))
+		string_add(stringbuffer, "sse3 ");
+	if (check_bit(ecx, 9))
+		string_add(stringbuffer, "ssse3 ");
+	if (check_bit(ecx, 19))
+		string_add(stringbuffer, "sse4.1 ");
+	if (check_bit(ecx, 20))
+		string_add(stringbuffer, "sse4.2 ");
+	writeline(stringbuffer->data);
+	string_free(stringbuffer);
+	return SIG_SUCCESS;
+}
+
 int syslog(char* params)
 {
 	writeline("");
@@ -428,7 +535,7 @@ int reboot(char* params)
 		x = inb(KBD_CMD_PORT);
 	outb(KBD_CMD_PORT, 0xFE); // Trigger the reset pin.
 	
-	return SIG_FAIL; // This shouldn't happen, hence FAIL.
+	return ERR_HARDWARE; // This shouldn't happen.
 }
 
 int shutdown(char* params)
@@ -441,9 +548,12 @@ int shutdown(char* params)
 int time(char* params)
 {
 	asm volatile("xchgw %bx, %bx");
-	string* stringbuffer = string_new();
+	string* stringbuffer = string_newsz(25);
 	bool bcd;
 	int seconds, minutes, hours;
+	
+	if (stringbuffer == NULL)
+		return ERR_OUT_OF_MEMORY;
 	
 	// Calculate the uptime.
 	seconds = get_ticks() / 1000; // Get the total running seconds from the timer system.
@@ -485,7 +595,6 @@ int time(char* params)
 	if (CMOS_read(CMOS_CENTURY, bcd) != CENTURY) // Hopefully this isn't being run outside of the 2000's.
 		writeline("WARNING! Real time may not be accurate."); // Print a warning message.
 	writeline(stringbuffer->data); // Print the real time.
-	// TODO: And the uptime, calculated with the PIT.
 	
 	string_free(stringbuffer);
 	return SIG_SUCCESS; // Free and return.
@@ -493,14 +602,6 @@ int time(char* params)
 
 int debug(char* params)
 {
-	asm volatile ("xchgw %bx, %bx");
-	
-	// TEMP
-	void* tempmem = malloc(18);
-	asm volatile ("xchgw %bx, %bx");
-	tempmem = realloc(tempmem, 40);
-	asm volatile ("xchgw %bx, %bx");
-	free(tempmem);
 	asm volatile ("xchgw %bx, %bx");
 	return SIG_SUCCESS;
 }

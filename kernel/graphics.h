@@ -17,7 +17,6 @@ void kprint(int pos, char *text, char color);			// Prints a null terminated stri
 void kprintnum(int pos, int num, char color, int base); // Print an integer onto the screen at the specified position.
 
 void kflip();											// Flip the back buffer onto video memory.
-void ksync();											// Wait for vertical sync before proceeding.
 
 void set_vidptr(int pos);								// Set the vidptr to the position + framebuffer offset.
 void handle_newline();									// Handle newline characters.
