@@ -18,5 +18,7 @@
 #define ERR_INVALID_DATA	8	// The data is invalid.
 #define ERR_INVALID_NAME	9	// The name is invalid.
 #define ERR_FILE_TOO_BIG	10	// File is too big to access.
+#define ERR_IO				11	// General IO Error.
+#define ERR_HARDWARE		12	// General hardware error, out of the kernel's control.
 
 #endif

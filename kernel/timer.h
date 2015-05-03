@@ -20,11 +20,14 @@
 #define PIT_INIT		0x34	// The initialization byte for the system timer. (0011 0100)
 								// (00			11			010			0)
 								// Channel 0 	highb/lowb 	rate gen	binary mode
+								
+#define VSYNC_MS		20		// Temporary something resembling Vsync until a proper VGA hardware driver is in.
 
 void timer_init();				// Initialize the PIT.
 void timer_IRQ();				// PIT IRQ handler.
 unsigned long get_ticks();		// Return the total number of ticks since system start.
 
 void ksleep(int milliseconds);	// Do nothing, intentionally.
+void ksync();					// Wait for vertical sync before proceeding.
 
 #endif
