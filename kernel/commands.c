@@ -10,6 +10,7 @@
 #include "keyboard.h"
 #include "interrupts.h"
 #include "hardware.h"
+#include "floppy.h"
 #include "terminal.h"
 #include "timer.h"
 #include "graphics.h"
@@ -28,8 +29,12 @@ struct command commands[] = // List of built in command structs, their ID's, hel
 		
 		{ "history", "Display recent terminal history.", "history - no parameters", &history },
 		
+		{ "disk", "Display disk drive information or change working disk.", "disk (x) - x: disk to change to (fd1/fd2/hd1/hd2)" , &disk},
+		
 		{ "memview", "Display a screen of memory, starting at the specified location.", 
 		"memview (x) - x: starting location", &memview },
+		
+		{ "echo", "Echo a string onto a new line.", "echo (x) - x: string to echo", &echo},
 		
 		{ "cls", "Clears the screen.", "cls - no parameters", &cls },
 		
@@ -192,6 +197,23 @@ int history(char* params)
 	return SIG_SUCCESS;
 }
 
+int disk(char* params)
+{
+	// TODO: Do something with params at some point.
+	
+	string* stringbuffer = string_newsz(80);
+	
+	string_set(stringbuffer, "Floppy Drive #1 (Master): ");
+	string_add(stringbuffer, floppy_getstring(false));
+	writeline(stringbuffer->data); // Print master floppy disk information.
+	
+	string_set(stringbuffer, "Floppy Drive #2  (Slave): ");
+	string_add(stringbuffer, floppy_getstring(true));
+	writeline(stringbuffer->data); // Print slave floppy disk information.
+	
+	return SIG_SUCCESS;
+}
+
 int list(char* params)
 {
 	return SIG_SUCCESS;
@@ -260,6 +282,12 @@ int cprompt(char* params)
 		writeline("Invalid prompt.");
 		return SIG_FAIL;
 	}
+}
+
+int echo(char* params)
+{
+	writeline(params);
+	return SIG_SUCCESS;
 }
 
 int cls(char* params)
@@ -458,6 +486,7 @@ int cpuinfo(char* params)
 	if (check_bit(edx, 30))
 		string_add(stringbuffer, "ia64 ");
 	writeline(stringbuffer->data);
+	writeline("");
 	
 	writeline("Instruction Sets:");
 	string_clear(stringbuffer); // Detect and print CPU instruction sets.
