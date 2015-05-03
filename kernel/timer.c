@@ -41,3 +41,9 @@ void ksleep(int milliseconds)
 	
 	while (ticks < ticksgoal) { } // Wait until ticksgoal is met.
 }
+
+void ksync()
+{
+	// Do nothing until ticks is on a multiple of VSync milliseconds.
+	while (ticks % VSYNC_MS != 0) { }
+}
