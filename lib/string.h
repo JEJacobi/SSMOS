@@ -15,6 +15,8 @@ char *strcat(char *dest, char *src);					// Append a null terminated string to *
 char *strncat(char *dest, char *src, size_t n);			// Same as above, but indicate bytes to append by n.
 
 int strcmp(char *str1, char *str2);						// Compare two strings (<0 less, =0 equal, >0 greater).
+char* strtok(char* str, char* delim);					// Extract the next token from a string. 
+														// If str == NULL, continue parsing the last string.
 void strrev(char* begin, char* end);					// Reverse a string from begin to end.
 
 void toupper(char *str);								// Converts all lower-case letters to upper-case.

@@ -5,6 +5,7 @@
 
 #include "debug.h"
 #include "string.h"
+#include "signal.h"
 
 //
 //	Kernel heap memory manager.
@@ -41,8 +42,7 @@ void *kmalloc(size_t size)
 	{
 		if (newptr->next_ptr == NULL)
 		{
-			klog("ERROR: Cannot allocate desired memory!"); // Log the error.
-			haltdump("");
+			haltdump("Memory allocation error!", ERR_OUT_OF_MEMORY);
 			return NULL; // No more blocks to try, return NULL.
 		}
 		newptr = newptr->next_ptr;

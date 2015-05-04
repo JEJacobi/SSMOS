@@ -254,11 +254,6 @@ int view(char* params)
 	return SIG_SUCCESS;
 }
 
-int hexview(char* params)
-{
-	return SIG_SUCCESS;
-}
-
 int memview(char* params)
 {
 	return SIG_SUCCESS;

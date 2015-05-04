@@ -110,6 +110,11 @@ int strcmp(char *str1, char *str2)
 	return 0; // If it still hasn't, both are exactly equal, so return 0.
 }
 
+char* strtok(char* str, char* delim)
+{
+	
+}
+
 void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offshoot thing.
 {
 	if (begin == NULL || end == NULL)

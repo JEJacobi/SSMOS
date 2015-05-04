@@ -58,7 +58,7 @@ bool check_interrupts_enabled(); 			// Check that interrupts are enabled.
 // Awful looking parameter list is due to interrupt_handler reading the format of both
 // the custom interrupt common_handler and the pusha instruction to save the registers.
 
-int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int ignore, int err);
+int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num);
 
 // In other words, DO NOT CHANGE OR EVERYTHING BREAKS.
 

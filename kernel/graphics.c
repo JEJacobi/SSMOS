@@ -17,12 +17,13 @@ volatile char *vidptr;
 char* numbuffer;
 void* framebuffer;
 
-volatile char fb[FRAMEBUFFER_SIZE];
+char fb[FRAMEBUFFER_SIZE];	// Chunk for framebuffer.
+char nb[MAX_INT_CHARS];	// Chunk for numbuffer.
 
 void graphics_init()
 {
 	framebuffer = &fb;	//Get a chunk of memory to store the video framebuffer in.
-	numbuffer = kmalloc(MAX_INT_CHARS);		//Get a chunk of memory to act as a buffer for printing numbers.
+	numbuffer = &nb[0];	//Get a chunk of memory to act as a buffer for printing numbers.
 	vidptr = (volatile char*)framebuffer;
 	
 	// Log the graphics initialization.

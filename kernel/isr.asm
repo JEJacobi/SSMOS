@@ -6,6 +6,7 @@ global interrupt_handler_%1
 interrupt_handler_%1:
 	push dword 0
 	push dword [BUFFER]
+	pushad
 	push dword %1
 	jmp common_handle
 %endmacro
@@ -15,6 +16,7 @@ interrupt_handler_%1:
 global interrupt_handler_%1
 interrupt_handler_%1:
 	push dword [BUFFER]
+	pushad
 	push dword %1
 	jmp common_handle
 %endmacro
@@ -28,9 +30,9 @@ common_handle:
 	mov [BUFFER], eax ; Buffer the return value around popad.
 	;xchg bx, bx
 	popad		; Restore registers and EFLAGS.
-	
-	mov eax, [BUFFER] ; Unbuffer, and clear edx since it's the other return register.
 	add esp, 4 	; Restore the esp to the pre-handling state.
+	popad
+	mov eax, [BUFFER] ; Unbuffer, and clear edx since it's the other return register.
 	pop dword [BUFFER]
 	add esp, 4
 	iretd 		; And interrupt-return.

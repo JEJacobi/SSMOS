@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "cmos.h"
 #include "hardware.h"
+#include "signal.h"
 
 int floppy_gettype(bool slave)
 {
@@ -39,7 +40,7 @@ char* floppy_getstring(bool slave)
 		case FLOPPY_2_88MB_3_5:
 			return "2.88MB 3.5\"";
 		default:
-			haltdump("Unknown floppy drive type!");
+			haltdump("Unknown floppy drive type!", ERR_HARDWARE);
 	}
 	return NULL; // This won't happen.
 }

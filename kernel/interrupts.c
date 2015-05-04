@@ -183,11 +183,11 @@ bool check_interrupts_enabled()
     return flags & (1 << 9);
 }
 
-int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num, int ignore, int err)
+int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax, int num)
 {	
 	if (num >= 0x0 && num < 0x20) // Handle exceptions.
 	{
-		haltdump("EXCEPTION!"); // TEMP
+		haltdump("EXCEPTION!", 0); // TEMP
 		return 0;
 	}
 	else if (num >= 0x20 && num < 0x30) // Handle PIC/IRQ mapped interrupts.
@@ -203,7 +203,7 @@ int interrupt_handler(int edi, int esi, int ebp, int esp, int ebx, int edx, int 
 	}
 	else // Handle none of the above working.
 	{
-		haltdump("Unknown interrupt number.");
+		haltdump("Unknown interrupt number.", 0);
 		return -1; // This shouldn't happen anyway, haltdump never returns.
 	}
 }

@@ -8,6 +8,7 @@
 #include "graphics.h"
 #include "terminal.h"
 #include "output.h"
+#include "signal.h"
 
 int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 {
@@ -76,7 +77,7 @@ int process_syscall(int eax, int ebx, int ecx, int edx, int esi)
 			break;
 			
 		default: // unknown or error
-			haltdump("Unknown or invalid system call.");
+			haltdump("Unknown or invalid system call.", ERR_INTERRUPT);
 	}
 	return (int)NULL;
 }

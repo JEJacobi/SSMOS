@@ -46,7 +46,7 @@ void init_terminal()
 	aliases = list_new(NULL); // Initialize alias list.
 	
 	if (cmdhistory == NULL || aliases == NULL)
-		haltdump("FATAL ERROR! Cannot allocate required space for terminal.");
+		haltdump("FATAL ERROR! Cannot allocate required space for terminal.", ERR_OUT_OF_MEMORY);
 	
 	input = string_newsz(TERMINAL_INPUT_SIZE); // Allocate a string to act as a command buffer.
 	input_ptr = 0;
@@ -137,7 +137,7 @@ void parse_input()
 	string* historystr = string_new(); // String to store the executed text and link to the history list.
 	
 	if (cmd_string == NULL || params == NULL || historystr == NULL)
-		haltdump("MEMORY ERROR! Cannot allocate space for terminal");
+		haltdump("MEMORY ERROR! Cannot allocate space for terminal", ERR_OUT_OF_MEMORY);
 	
 	//
 	// Handle command history:

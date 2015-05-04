@@ -48,7 +48,7 @@ char *msgs = 	" Booting from drive number   :\n"
 char *shtdown =	" It is now safe to turn off the computer.                                       ";
 
 void kernel_main(int bdrive, int lomem, int himem)
-{
+{	
 	interrupts_init();	// Initialize the interrupts, and IDT.
 	memory_init(himem); // Initialize the heap and memory handlers.
 	graphics_init(); 	// Initialize the display stuff.
@@ -56,6 +56,8 @@ void kernel_main(int bdrive, int lomem, int himem)
 	timer_init();		// Initialize the 8253/8254 PIT and system timer.
 	
 	enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
+	
+	haltdump("TEST!", 0); // TEMP
 	
 	kclear();
 	

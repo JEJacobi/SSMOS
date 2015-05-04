@@ -1,4 +1,4 @@
-// OS-defined return signals:
+// OS-defined signals:
 
 #ifndef LIB_SIGNAL
 #define LIB_SIGNAL
@@ -20,5 +20,6 @@
 #define ERR_FILE_TOO_BIG	10	// File is too big to access.
 #define ERR_IO				11	// General IO Error.
 #define ERR_HARDWARE		12	// General hardware error, out of the kernel's control.
+#define ERR_INTERRUPT		13	// General interrupt error.
 
 #endif
