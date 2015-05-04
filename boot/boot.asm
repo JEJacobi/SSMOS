@@ -13,11 +13,13 @@ jmp 0x0000:start ; Skip the BPB, and ensure CS = 0.
 
 ;; FAT BIOS PARAMETER BLOCK ;;;;;;;;;;;;;;;;;
 
-db 0x0 ; Copied directly from the hex output of a formatted USB.
+db 0x0 ; TODO: Generate all this through mkdosfs.
 db 'SSMOS',0,0,0 ;
 db 0x00,0x02,0x01,0x32,0x11,0x02,0x00,0x00,0x00,0x00,0xF8,0x00,0x00,0x3F,0x00,0xFF,0x00,0x80,0x00,0x00,0x00,0x00,0xD3,0x03,0x00,0x67,0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x01,0x00,0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0x00,0x29,0x2F,0x2E,0x9D,0x36,0x4E,0x4F,0x20,0x4E,0x41,0x4D,0x45,0x20,0x20,0x20,0x20,0x46,0x41,0x54,0x33,0x32,0x20,0x20,0x20,0x33
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; --- INITIALIZATION ---
 
 start:
 mov ax, 0
@@ -35,41 +37,32 @@ int 0x10
 mov bx, boot ; Bootloader running message.
 call print_bios
 
-mov ah, 0x1 ; Hide the hardware cursor
+mov ah, 0x1 ; Hide the hardware cursor.
 mov ch, 0010b
 mov cl, 0x0
 int 0x10
-
-mov bx, 0xF ; Quickly test the stack.
-push bx
-mov bx, 0xE
-push bx
-mov bx, 0x0
-pop bx
-pop bx
-cmp bx, 0xF
-jne mem_error
-jmp stack_good
-
-mem_error: ; Something's really wrong.
-mov bx, memerror
-call print_bios
-jmp $ ; Not even going to try to fix it, halt.
-
-not_enough_memory: ; Not enough memory for the kernel to safely execute.
-mov bx, notenoughmemory
-call print_bios
-jmp $ ; Throw out a message and halt.
-
-stack_good: ; Everything's probably right.
 
 xor ax, ax ; Get the lowmem, store it.
 int 0x12 
 jc mem_error ; Something's gone wrong.
 mov [LOWMEM], ax
 cmp ax, MINMEM
-jle not_enough_memory ; If there's not enough memory for the kernel, don't bother trying.
+jle not_enough_memory	; If there's not enough memory for the kernel, don't bother trying.
+						; Note that this only tests for LOWMEM, the kernel is responsible for handling >1MB stuff.
+jmp mem_good ; Otherwise, continue.
 
+not_enough_memory: ; Not enough memory for the kernel to safely execute.
+	mov bx, notenoughmemory
+	call print_bios
+	jmp $ ; Throw out a message and halt.
+
+mem_error:
+	mov bx, memerror
+	call print_bios
+	jmp $
+	
+mem_good:
+	
 mov ax, 0x2401
 int 0x15 ; Try the BIOS activation of the A20 Line.
 cmp ah, 0x86
@@ -84,40 +77,35 @@ out 0x92, al
 
 a20done:
 
-mov bx, memgood ; Memory seems to be working.
-call print_bios
+; --- LOAD SECOND STAGE AND KERNEL FROM DISK ---
 
-mov bx, loadkernel ; Kernel loading message.
-call print_bios
+; First, load the rest of the bootloader:
 
-; --- DISK LOAD ---
-mov ah, 0x02			; Set the interrupt.
+mov ah, 0x2				; Set the interrupt.
 mov bx, SECONDSTAGE		; Load starting from the 2nd stage bootloader.
-mov al, SECTORS 		; Load however many sectors specified (bootloader through to kernel).
+mov al, LOADERSECTORS 	; Load however many sectors specified for the second stage loader.
 mov dl, [BOOTDRIVE] 	; Set dl to load from the boot drive.
-mov ch, 0x00
-mov dh, 0x00			; Start reading from the second.
-mov cl, 0x02 			; sector on disk (after the bootsector).
+mov ch, 0x0
+mov dh, 0x0				; Start reading from the second.
+mov cl, 0x2 			; sector on disk (after the bootsector).
 
-disk_read:
-	int 0x13 ; Read interrupt.
+call read_disk			; Read the loader or fail trying.
 
-jc read_error ; Carry flag means something's gone wrong, jump to handler.
-jmp load_complete ; If successful, read complete.
+mov ax, KERNEL_LOW		; Set the lowkernel's segment offset.
+mov es, ax	
+xor ax, ax
+mov ah, 0x2				; Now the same for the lowkernel.
+mov bx,	0x0 
+mov al, LOWSECTORS
+mov dl, [BOOTDRIVE]
+mov ch, 0x0
+mov dh, 0x0
+mov cl, 0x3
 
-read_error: ; Error reading the kernel.
-	push bx ; Temporarily store bx.
-	mov bx, readerror ; Print the error message.
-	call print_bios ; TODO: Add specific error code messages.
-	pop bx
-	
-	inc byte [READ_ATTEMPTS] ; Try to read again, up to MAX_ATTEMPTS.
-	cmp byte [READ_ATTEMPTS], MAX_ATTEMPTS ; See if we've exceeded max attempts.
-	jle disk_read ; If not, try again and hope it works.
-	
-	jmp $ ; If it still doesn't work, hang. Not much else to fix.
+call read_disk			; Next, read the lowkernel.
 
-load_complete: ; If nothing's gone wrong.
+mov ax, 0x0
+mov es, ax
 
 mov bx, loadsuccess
 call print_bios ; Throw out a load successful message.
@@ -135,32 +123,51 @@ jmp switch_pm ; And switch to the PM function in the second stage bootloader.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DATA											;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; MEMORY AND INIT:
+
 BOOTDRIVE: dd 0				; What drive the bootloader was originally loaded from.
 LOWMEM: dd 0				; How many KiB of low memory (~640k probably)
 HIGHMEM: dd 0				; How many KiB of high memory before the 15mb hole.
 
-READ_ATTEMPTS: db 0			; How many read attempts.
 MINMEM: equ 0x1E0			; The minimum memory needed for the kernel to load and execute, (~480kb).
-BOOTLOADER equ 0x7C00		; Location of the bootloader, usually 0x7C00.
-SECONDSTAGE equ 0x7E00		; Location of the second stage bootloader, one sector after 1st stage (usually 0x7E00).
-KERNEL_LOCATION equ 0x8000	; Location of the kernel, probably around 0x8000.
-SECTORS equ 0x40			; How many sectors to read from the disk into kernelspace.
-MAX_ATTEMPTS equ 0x5		; How many tries to read the disk.
+
 LOWSTACK equ 0x7c00			; Location of the real mode stack.
-HIGHSTACK equ 0x00007c00	; Location of the PM stack.
+HIGHSTACK equ 0x00007c00	; Location of the PM kernel stack.
+
+
+; LOADING:
+
+READ_ATTEMPTS: db 0			; How many disk read attempts so far.
+MAX_ATTEMPTS equ 0x5		; How many tries to read the disk before giving up.
+
+SECONDSTAGE equ 0x7E00		; Location of the second stage bootloader, one sector after 1st stage (usually 0x7E00-0x8000).
+LOADERSECTORS equ 0x1		; Size of the second stage bootloader in sectors.
+
+KERNEL_LOW equ 0x0800		; Segment offset of the low kernel block.
+KERNEL_HIGH equ 0x1000		; Segment offset of the high kernel block.
+LOWSECTORS equ 0x40			; How many sectors to read from the disk into low kernelspace (sub ~0x10000).
+HIGHSECTORS equ 0x3E		; How many sectors to read from the disk into high kernelspace (0x10000-0x20000).
+							; TODO: Is 3E the correct value for the first block of sectors?
+
+; MISC:
+	
 PS2CONTROLLER equ 0x64		; The PS/2 controller port.
+
+
+; STRINGS:
 
 boot: db 0x0a,0x0d,'Bootloader running...',0x0a,0x0d,0
 loadkernel: db 0x0a,0x0d,'Loading kernel from disk...',0x0a,0x0d,0
 readerror: db 0x0a,0x0d,'Disk read error!',0x0a,0x0d,0
 memgood: db 0x0a,0x0d,'Memory checks passed.',0x0a,0x0d,0
+memerror:db 0x0a,0x0d,'Memory read error!',0x0a,0x0d,0
 notenoughmemory: db 0x0a,0x0d,'Insufficient memory!',0x0a,0x0d,0
-memerror: db 0x0a,0x0d,'Memory error!',0x0a,0x0d,0
-hex: db '0x0000',0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; FUNCTIONS									;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 [bits 16]
 print_bios: ; bx is used as the start point of the string, and writes until NULL.
 	mov ah, 0x0e ; set the interrupt
@@ -172,9 +179,28 @@ _char:
 	jne _char
 	ret
 
-print_bios_hex:
-	ret
+read_disk: ; Interrupt values should be pre-set before calling this, it just handles any errors.
+
+	mov byte [READ_ATTEMPTS], 0x0 ; Clear any previous reads' attempts.
 	
+	disk_read:
+		int 0x13 ; Read interrupt.
+
+	jc read_error ; Carry flag means something's gone wrong, jump to handler.
+	ret ; If successful, read is complete and return.
+
+	read_error: ; Error reading the kernel.
+		push bx ; Temporarily store bx.
+		mov bx, readerror ; Print the error message.
+		call print_bios ; TODO: Add specific error code messages.
+		pop bx
+	
+		inc byte [READ_ATTEMPTS] ; Try to read again, up to MAX_ATTEMPTS.
+		cmp byte [READ_ATTEMPTS], MAX_ATTEMPTS ; See if we've exceeded max attempts.
+		jle disk_read ; If not, try again and hope it works.
+	
+		jmp $ ; If it still doesn't work, hang. Not much else to fix.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 times 510-($-$$) db 0
@@ -248,7 +274,7 @@ gdt_begin: ; Simple-flat memory model.
 dd 0x0 ; Null descriptor.
 dd 0x0
 
-gdt_data: ; Basically the same but data - 0x8
+gdt_data: ; The main data segment - 0x8
 dw 0xffff
 dw 0x0
 db 0x0
@@ -256,7 +282,7 @@ db 10010010b
 db 11001111b
 db 0x0
 
-gdt_code: ; Wizardry goes here - 0x10
+gdt_code: ; Wizardry goes here (and code!) - 0x10
 dw 0xffff
 dw 0x0
 db 0x0
@@ -264,7 +290,7 @@ db 10011010b
 db 11001111b
 db 0x0
 
-gdt_end: ; Apparently I need this.
+gdt_end:
 
 gdt_descriptor: ; Precalculate the GDT descriptor.
 dw gdt_end - gdt_begin - 1
@@ -285,11 +311,11 @@ ps2error: db 0x0a,0x0d,'PS/2 self-test failed!',0x0a,0x0d,0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 switch_pm: ; Switch to Protected Mode.
-	finit ; Initialize the FPU.
-	cli ; Interrupts off.
-	lgdt [gdt_descriptor] ; Pass the gdt.
+	finit ; Initialize the FPU. TODO: This the right way to do it?
+	cli ; Interrupts off, kernel will take care of initializing them.
+	lgdt [gdt_descriptor] ; Pass the GDT.
 	mov eax, cr0
-	or eax, 0x1 ; Activate the PM bit.
+	or eax, 0x1 ; Activate the PM bit in control register 0.
 	mov cr0, eax ; Set the control register for PM.
 	
 ;; PROTECTED MODE STARTS HERE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -301,7 +327,7 @@ setup_pm: ; Setup PM once in it.
 	mov ax, DATA_SEGMENT
 	mov ds, ax
 	mov es, ax ; Assign all data segment registers.
-	mov fs, ax ; to the valid memory thing.
+	mov fs, ax ; to the new valid GDT segments.
 	mov gs, ax
 	mov ss, ax
 	
@@ -311,9 +337,11 @@ setup_pm: ; Setup PM once in it.
 	jmp start_kernel ; And back to main.
 	
 start_kernel:
-	push dword [HIGHMEM] ; Push important things onto the stack... backwards because C.
-	push dword [LOWMEM]
-	push dword [BOOTDRIVE]
-	;xchg bx, bx
+	push dword [HIGHMEM] ; Push important things onto the stack.
+	push dword [LOWMEM]  ; The kernel will confirm there's enough high memory to run, we just need to worry about lomem.
+	push dword [BOOTDRIVE] ; And also be sure to tell it what disk all this is from
 	call kernel_main ; And call kernel_main() in C land.
-jmp $ ; Hang forever on return.
+jmp $ ; Hang forever on return (OS shutdown).
+
+times 1024-($-$$) db 0 ; Pad out the second stage until the end of the sector.
+
