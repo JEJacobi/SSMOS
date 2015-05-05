@@ -35,4 +35,4 @@ nasm -felf32 ../kernel/*.asm
 mv ../kernel/*.o .
 
 # And glue it all together.
-$CC -o ../ssmos.bin boot.bin *.o -Ttext 0x7C00 -Wl,--oformat=binary $CFLAGS -lgcc -I../kernel $LIB
+$CC -o ../ssmos.img boot.bin *.o -Ttext 0x7C00 -Wl,--oformat=binary $CFLAGS -lgcc -I../kernel $LIB

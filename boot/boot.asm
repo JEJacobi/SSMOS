@@ -5,11 +5,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CODE											;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;[org 0x7c00] ; Bootsector offset.
+; Commented out because compiling as an ELF file means externally defined org.
+
 [bits 16] ; Start in 16-bit Real Mode.
-extern kernel_main
-global _start
-jmp 0x0000:start ; Skip the BPB, and ensure CS = 0.
+extern kernel_main	; This is the main kernel function we'll jump to later.
+global _start		; Useless right now, kept around in case it's ever needed.
+jmp 0x0000:start	; Skip the BPB, and ensure CS = 0, just in case the BIOS loaded it weirdly.
 
 ;; FAT BIOS PARAMETER BLOCK ;;;;;;;;;;;;;;;;;
 
@@ -21,65 +24,68 @@ db 0x00,0x02,0x01,0x32,0x11,0x02,0x00,0x00,0x00,0x00,0xF8,0x00,0x00,0x3F,0x00,0x
 
 ; --- INITIALIZATION ---
 
-start:
+start:				; The jump target immediately after the FAT BPB.
+
 mov ax, 0
 mov ss, ax
-mov bp, LOWSTACK ; Quickly setup the stack.
+mov bp, LOWSTACK	; Quickly setup the stack and segments.
 mov sp, bp
 xor ax, ax
 
 mov [BOOTDRIVE], dl ; Record the bootdrive.
 
-mov ah, 0x0 ; Set video mode to 80*25 VGA - 16 colors.
-mov al, 0x3
+mov ah, 0x0			; Set video mode to 80*25 VGA - 16 colors.
+mov al, 0x3			; This might change if a proper graphical driver ever gets in.
 int 0x10
 
-mov bx, boot ; Bootloader running message.
+mov bx, boot		; Bootloader running message.
 call print_bios
 
-mov ah, 0x1 ; Hide the hardware cursor.
+mov ah, 0x1			; Hide the hardware cursor.
 mov ch, 0010b
 mov cl, 0x0
-int 0x10
+int 0x10			; Hacky as all hell, does get rid of the BIOS cursor reasonably quickly, though.
 
-xor ax, ax ; Get the lowmem, store it.
+xor ax, ax				; Get the lowmem, store it.
 int 0x12 
-jc mem_error ; Something's gone wrong.
+jc mem_error			; Something's gone wrong.
 mov [LOWMEM], ax
 cmp ax, MINMEM
 jle not_enough_memory	; If there's not enough memory for the kernel, don't bother trying.
 						; Note that this only tests for LOWMEM, the kernel is responsible for handling >1MB stuff.
-jmp mem_good ; Otherwise, continue.
+jmp mem_good			; Otherwise, continue.
 
-not_enough_memory: ; Not enough memory for the kernel to safely execute.
+not_enough_memory: 		; Not enough memory for the kernel to safely execute.
 	mov bx, notenoughmemory
 	call print_bios
-	jmp $ ; Throw out a message and halt.
+	jmp $ 				; Throw out a message and halt.
 
-mem_error:
+mem_error:				; Something's gone -really- wrong.
 	mov bx, memerror
 	call print_bios
 	jmp $
 	
-mem_good:
+mem_good:				; Everything's good with the memory.
 	
 mov ax, 0x2401
-int 0x15 ; Try the BIOS activation of the A20 Line.
+int 0x15				; Try the BIOS activation of the A20 Line.
 cmp ah, 0x86
 jmp a20alt
 jmp a20done
 
-a20alt:
+a20alt:					; If that doesn't work, try a more traditional version.
 
 in al, 0x92
-or al, 2 ; If that doesn't work, try a more traditional version.
+or al, 2 			
 out 0x92, al
 
-a20done:
+a20done:				; At this point, if the A20 still isn't on, there's not much more else to try.
+
 
 ; --- LOAD SECOND STAGE AND KERNEL FROM DISK ---
 
-; First, load the rest of the bootloader:
+; First, load the rest of the bootloader without any fancy conversions.
+; We just need more space to work in.
 
 mov ah, 0x2				; Set the interrupt.
 mov bx, SECONDSTAGE		; Load starting from the 2nd stage bootloader.
@@ -91,21 +97,11 @@ mov cl, 0x2 			; sector on disk (after the bootsector).
 
 call read_disk			; Read the loader or fail trying.
 
-mov ax, KERNEL_LOW		; Set the lowkernel's segment offset.
-mov es, ax	
-xor ax, ax
-mov ah, 0x2				; Now the same for the lowkernel.
-mov bx,	0x0 
-mov al, LOWSECTORS
-mov dl, [BOOTDRIVE]
-mov ch, 0x0
-mov dh, 0x0
-mov cl, 0x3
+; Now that the second stage loader is in memory at 0x7E00-0x8000, load the kernel.
 
-call read_disk			; Next, read the lowkernel.
+; TODO: Get disk info (sectors per track and number of heads) BEFORE calling lba->chs
 
-mov ax, 0x0
-mov es, ax
+; TODO: Dynamic loading.
 
 mov bx, loadsuccess
 call print_bios ; Throw out a load successful message.
@@ -138,22 +134,21 @@ HIGHSTACK equ 0x00007c00	; Location of the PM kernel stack.
 
 ; LOADING:
 
-READ_ATTEMPTS: db 0			; How many disk read attempts so far.
+READSECTORS: db 0x0			; How many kernel sectors read so far.
+READ_ATTEMPTS: db 0x0		; How many disk read attempts so far.
+
 MAX_ATTEMPTS equ 0x5		; How many tries to read the disk before giving up.
 
 SECONDSTAGE equ 0x7E00		; Location of the second stage bootloader, one sector after 1st stage (usually 0x7E00-0x8000).
 LOADERSECTORS equ 0x1		; Size of the second stage bootloader in sectors.
 
-KERNEL_LOW equ 0x0800		; Segment offset of the low kernel block.
-KERNEL_HIGH equ 0x1000		; Segment offset of the high kernel block.
-LOWSECTORS equ 0x40			; How many sectors to read from the disk into low kernelspace (sub ~0x10000).
-HIGHSECTORS equ 0x3E		; How many sectors to read from the disk into high kernelspace (0x10000-0x20000).
-							; TODO: Is 3E the correct value for the first block of sectors?
+KERNEL_START equ 0x0800		; Segment offset of the low kernel block.
+TOTALSECTORS equ 0x80		; How many sectors to read from the disk into kernelspace.
+SECTORSIZE equ 0x200		; Standard disk sectors are 512-bytes long.
 
 ; MISC:
 	
 PS2CONTROLLER equ 0x64		; The PS/2 controller port.
-
 
 ; STRINGS:
 
@@ -181,53 +176,56 @@ _char:
 
 read_disk: ; Interrupt values should be pre-set before calling this, it just handles any errors.
 
-	mov byte [READ_ATTEMPTS], 0x0 ; Clear any previous reads' attempts.
+	mov byte [READ_ATTEMPTS], 0x0 	; Clear any previous reads' attempts.
 	
 	disk_read:
-		int 0x13 ; Read interrupt.
+		int 0x13 					; Read interrupt.
 
-	jc read_error ; Carry flag means something's gone wrong, jump to handler.
-	ret ; If successful, read is complete and return.
+	jc read_error					; Carry flag means something's gone wrong, jump to handler.
+	ret								; If successful, read is complete and return.
 
-	read_error: ; Error reading the kernel.
-		push bx ; Temporarily store bx.
-		mov bx, readerror ; Print the error message.
-		call print_bios ; TODO: Add specific error code messages.
+	read_error:						; Error reading the kernel.
+		push bx						; Temporarily store bx.
+		mov bx, readerror			; Print the error message.
+		call print_bios
 		pop bx
 	
-		inc byte [READ_ATTEMPTS] ; Try to read again, up to MAX_ATTEMPTS.
-		cmp byte [READ_ATTEMPTS], MAX_ATTEMPTS ; See if we've exceeded max attempts.
-		jle disk_read ; If not, try again and hope it works.
+		inc byte [READ_ATTEMPTS]	; Try to read again, up to MAX_ATTEMPTS.
+
+		cmp byte [READ_ATTEMPTS], MAX_ATTEMPTS 
+
+									; See if we've exceeded max attempts.
+		jle disk_read 				; If not, try again and hope it works.
 	
-		jmp $ ; If it still doesn't work, hang. Not much else to fix.
+		jmp $						; If it still doesn't work, hang. Not much else to fix.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 times 510-($-$$) db 0
-dw 0xaa55 ; Bootability.
+dw 0xaa55 ; Bootability. This also marks the very end of the first stage loader.
 
 ;; SECOND STAGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-get_himem: ; Get the amount of high memory (before the 15m hole).
+get_himem:				; Get the amount of high memory (before the 15m hole).
 	xor eax, eax
-	xor ebx, ebx ; Clear 'em all.
+	xor ebx, ebx		; Clear 'em all.
 	xor ecx, ecx
 	xor edx, edx
 	mov ax, 0xE801
-	int 0x15 ; Ask BIOS.
-	jc himem_error ; Check for carry flag.
-	cmp ah, 0x86 ; Make sure the function's supported.
+	int 0x15			; Ask BIOS.
+	jc himem_error		; Check for carry flag.
+	cmp ah, 0x86		; Make sure the function's supported.
 	je himem_error
-	cmp ah, 0x80 ; Check that the command is valid.
+	cmp ah, 0x80		; Check that the command is valid.
 	je himem_error
-	jcxz himem_other ; Check for cx = 0, if so, try ax.
-	mov [HIGHMEM], cx ; If not, the value needed is in cx.
+	jcxz himem_other	; Check for cx = 0, if so, try ax.
+	mov [HIGHMEM], cx	; If not, the value needed is in cx.
 	jmp himem_successful
 
 ; HANDLE HIMEM:	
 	
 himem_other:
-	mov [HIGHMEM], ax ; Using ax instead of cx.
+	mov [HIGHMEM], ax	; Using ax instead of cx.
 	jmp himem_successful
 
 himem_error:
@@ -237,44 +235,66 @@ himem_error:
 	
 himem_successful:
 	mov bx, himemsuccess
-	call print_bios ; All's good.
+	call print_bios		; All's good.
 	ret
 
 ; HANDLE PS/2:
 	
-setup_ps2:
+setup_ps2:						; TODO: This whole area really needs a complete overhaul.
 	mov al, 0xA7
 	out PS2CONTROLLER, al		; Disable the second PS/2 device, if it exists.
 	
-	;out PS2CONTROLLER, 0xAD		; Disable the first PS/2 device for initialization purposes.
-	; TODO, modify the Controller Configuration Byte (see OSDev)
-	;out PS2CONTROLLER, 0xAA		; Send self-test command to the PS/2 controller.
+	;out PS2CONTROLLER, 0xAD	; Disable the first PS/2 device for initialization purposes.
+								; TODO, modify the Controller Configuration Byte (see OSDev)
+	;out PS2CONTROLLER, 0xAA	; Send self-test command to the PS/2 controller.
 	jmp ps2_good
 	
 ps2_test:
-	; TODO: Self test.
+								; TODO: Self test.
 	
 ps2_error:
 	mov bx, ps2error
-	call print_bios ; Something's gone wrong in the PS/2 self test.
-	jmp $ ; Message and halt.
+	call print_bios				; Something's gone wrong in the PS/2 self test.
+	jmp $						; Message and halt.
 
-ps2_good:
-	; RE ENABLE PS2 DEVICES
+ps2_good:						; Re-enable PS2 devices if everything's good.
 	mov bx, ps2good
 	call print_bios
 	ret
+	
+; HANDLE LBA->CHS CONVERSION:
+
+lba_chs:			; Takes AX as LBA address, converts it, and saves the value in memory.
+	push ax			; At [cyl] : [head] : [sector], but [spt] and [numhd] MUST be already setup.	
+	push dx
+
+	xor dx, dx					; Make sure there isn't anything in dx interfering with div.
+	div [spt]					; Divide LBA (ax) / Sectors Per Track [spt]
+	mov bx, ax					; Move TEMP from ax to bx. This will be used later.
+	mov byte [sector], dx		; Store the remainder (modulus) in sectors.
+	inc [sector]				; And increment it once, since CHS indexes at 1.
+	xor dx, dx					; Clear dx again for the next division.
+
+	div [numhd]					; Next, divide ax (TEMP) / [numhd] (number of heads)
+	mov byte [head], dx			; Store the remainder in [head].
+	mov byte [cyl], ax			; And the quotient in [cyl].
+
+
+	pop dx
+	pop ax
+	ret							; And that's the sector, head, and cylinder.  
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GDT - Global Descriptor Table				;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-gdt_begin: ; Simple-flat memory model.
+gdt_begin:		; Simple-flat memory model.
 
-dd 0x0 ; Null descriptor.
+dd 0x0			; Null descriptor.
 dd 0x0
 
-gdt_data: ; The main data segment - 0x8
+gdt_data:		; The main data segment - 0x8
 dw 0xffff
 dw 0x0
 db 0x0
@@ -282,7 +302,7 @@ db 10010010b
 db 11001111b
 db 0x0
 
-gdt_code: ; Wizardry goes here (and code!) - 0x10
+gdt_code:		; Wizardry goes here (and code!) - 0x10
 dw 0xffff
 dw 0x0
 db 0x0
@@ -292,14 +312,28 @@ db 0x0
 
 gdt_end:
 
-gdt_descriptor: ; Precalculate the GDT descriptor.
+gdt_descriptor:							; Precalculate the GDT descriptor.
 dw gdt_end - gdt_begin - 1
 dd gdt_begin
 
-CODE_SEGMENT equ gdt_code - gdt_begin ; Precalculate the segment locations.
+CODE_SEGMENT equ gdt_code - gdt_begin	; Precalculate the segment locations.
 DATA_SEGMENT equ gdt_data - gdt_begin
 
 ;; SECOND STAGE DATA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; LBA REQUIRED INFORMATION:
+; (fill this out before calling lba->chs)
+
+spt: 	db 0x0	; Sectors per track of the boot disk.
+numhd:	db 0x0	; Number of heads of the boot disk.
+
+
+; LBA CONVERSION OUTPUTS:
+
+sector:	db 0x0	; Current sector to read.
+head:	db 0x0	; Current head to read.
+cyl:	db 0x0	; Current cylinder to read.
+
 
 loadsuccess: db 0x0a,0x0d,'Kernel successfully loaded!',0x0a,0x0d,0
 switchpm: db 0x0a,0x0d,'Switching to Protected Mode...',0x0a,0x0d,0
@@ -310,13 +344,13 @@ ps2error: db 0x0a,0x0d,'PS/2 self-test failed!',0x0a,0x0d,0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-switch_pm: ; Switch to Protected Mode.
-	finit ; Initialize the FPU. TODO: This the right way to do it?
-	cli ; Interrupts off, kernel will take care of initializing them.
-	lgdt [gdt_descriptor] ; Pass the GDT.
+switch_pm:					; Switch to Protected Mode.
+	finit 					; Initialize the FPU. TODO: This the right way to do it?
+	cli						; Interrupts off, kernel will take care of initializing them.
+	lgdt [gdt_descriptor]	; Pass the GDT.
 	mov eax, cr0
-	or eax, 0x1 ; Activate the PM bit in control register 0.
-	mov cr0, eax ; Set the control register for PM.
+	or eax, 0x1				; Activate the PM bit in control register 0.
+	mov cr0, eax			; Set the control register for PM.
 	
 ;; PROTECTED MODE STARTS HERE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -326,22 +360,22 @@ switch_pm: ; Switch to Protected Mode.
 setup_pm: ; Setup PM once in it.
 	mov ax, DATA_SEGMENT
 	mov ds, ax
-	mov es, ax ; Assign all data segment registers.
-	mov fs, ax ; to the new valid GDT segments.
+	mov es, ax					; Assign all data segment registers.
+	mov fs, ax					; to the new valid GDT segments.
 	mov gs, ax
 	mov ss, ax
 	
-	mov ebp, HIGHSTACK ; Setup the new protected mode stack.
-	mov esp, ebp ; Old one's invalid, oh well.
+	mov ebp, HIGHSTACK			; Setup the new protected mode stack.
+	mov esp, ebp				; Old one's invalid, oh well.
 	
-	jmp start_kernel ; And back to main.
+	jmp start_kernel			; And back to main.
 	
 start_kernel:
-	push dword [HIGHMEM] ; Push important things onto the stack.
-	push dword [LOWMEM]  ; The kernel will confirm there's enough high memory to run, we just need to worry about lomem.
-	push dword [BOOTDRIVE] ; And also be sure to tell it what disk all this is from
-	call kernel_main ; And call kernel_main() in C land.
-jmp $ ; Hang forever on return (OS shutdown).
+	push dword [HIGHMEM]		; Push important things onto the stack.
+	push dword [LOWMEM]			; The kernel will confirm there's enough high memory to run, we just need to worry about lomem.
+	push dword [BOOTDRIVE]		; And also be sure to tell it what disk all this is from
+	call kernel_main			; And call kernel_main() in C land.
+jmp $							; Hang forever on return (OS shutdown).
 
-times 1024-($-$$) db 0 ; Pad out the second stage until the end of the sector.
+times 1024-($-$$) db 0			; Pad out the second stage until the end of the sector.
 

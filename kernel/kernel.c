@@ -57,7 +57,7 @@ void kernel_main(int bdrive, int lomem, int himem)
 	
 	enable_interrupts(); // And turn the interrupts back on after the bootloader disable.
 	
-	haltdump("TEST!", 0); // TEMP
+	//haltdump("TEST!", 0); // TEMP
 	
 	kclear();
 	
