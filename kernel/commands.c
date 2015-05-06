@@ -379,7 +379,10 @@ int alias(char* params)
 	{
 		string* newalias = string_new();
 		string* newcmd = string_new();
+		struct element* listptr = get_first(aliases);
 		struct alias* aliasptr;
+		struct alias* oldptr;
+		string* oldstr;
 		int i = 0;
 		
 		while (params[i] != ' ' && params[i] != 0x0) // Parse the first word to be the alias name.
@@ -399,7 +402,21 @@ int alias(char* params)
 			i++;
 		}
 		
-		// TODO: Find if there are any matches in the already existing alias list, and overwrite if there are.
+		while (listptr != NULL) // Find and overwrite any alias name matches, if there are any.
+		{
+			oldptr = listptr->value;
+			oldstr = oldptr->alias;
+			
+			if (strcmp(newalias->data, oldstr->data) == 0) // If the two aliases' strings are equal, they're duplicates.
+			{
+				oldstr = oldptr->command; // Record a pointer to the old command.
+				oldptr->command = newcmd; // Overwrite the old command with the new one.
+				string_free(oldstr); // Free the old, overwritten command string.
+				string_free(newalias); // And free the new unused alias string.
+				return SIG_SUCCESS; // And return.
+			}
+			listptr = listptr->next;
+		}
 		
 		aliasptr = (struct alias*)kmalloc(sizeof(struct alias)); // Allocate.
 		aliasptr->alias = newalias; // Assign.
