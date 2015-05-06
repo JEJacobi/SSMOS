@@ -81,7 +81,6 @@ out 0x92, al
 
 a20done:				; At this point, if the A20 still isn't on, there's not much more else to try.
 
-
 ; --- LOAD SECOND STAGE AND KERNEL FROM DISK ---
 
 ; First, load the rest of the bootloader without any fancy conversions.
@@ -96,19 +95,39 @@ mov dh, 0x0				; Start reading from the second.
 mov cl, 0x2 			; sector on disk (after the bootsector).
 
 call read_disk			; Read the loader or fail trying.
+call get_diskinfo		; Next, get disk info (sectors per track and number of heads) BEFORE calling lba->chs
 
 ; Now that the second stage loader is in memory at 0x7E00-0x8000, load the kernel.
 
-; TODO: Get disk info (sectors per track and number of heads) BEFORE calling lba->chs
+kernel_load:							; We'll loop back here for each sector load.
+	mov ax, word [CURRENT_OFFSET]		; Load the segment register used by 13h from memory.
+	mov es, ax
+	mov ax, word [CURRENT_SECTOR]		; Load the LBA sector to read into ax.
+	call lba_chs						; Convert it to CHS format, which is in memory.
+	xor ax, ax
+	mov ah, 0x2
+	mov bx, 0x0							; We'll be loading into segments, not offsets.
+	mov al, 0x1							; Only load one sector at a time.
+	mov dl, [BOOTDRIVE]					; Make sure the boot drive is selected.
+	mov ch, byte [cyl]					; Load cylinder from memory.
+	and ch, 0xFF						; AND cylinders by 0xFF.
+	mov dh, byte [head]					; Load heads from memory.
+	mov cl, byte [sector]				; Load sectors from memory.
+										; NOTE: This is technically illegal for high cylinder values.
+										
+	call read_disk						; And read the disk.
+	
+	add word [CURRENT_OFFSET], SECTORSIZE
+	add word [CURRENT_SECTOR], 1		; Increment the current offset to read to and the last sector that's been read.
+	cmp word [CURRENT_SECTOR], TOTALSECTORS
+	jle kernel_load						; Jump back to kernel_load if there's more sectors to read.
 
-; TODO: Dynamic loading.
+mov bx, loadsuccess	; Otherwise, we're done.
+call print_bios		; Throw out a load successful message.
 
-mov bx, loadsuccess
-call print_bios ; Throw out a load successful message.
+call get_himem		; Get the amount of highmemory before switching to PM.
 
-call get_himem ; Get the amount of highmemory before switching to PM.
-
-call setup_ps2 ; Setup the PS/2 controller.
+call setup_ps2		; Setup the PS/2 controller.
 
 ; --- START PROTECTED MODE AND KERNEL ---
 mov bx, switchpm
@@ -134,7 +153,8 @@ HIGHSTACK equ 0x00007c00	; Location of the PM kernel stack.
 
 ; LOADING:
 
-READSECTORS: db 0x0			; How many kernel sectors read so far.
+CURRENT_SECTOR: dw 0x2		; What LBA sector we're reading right now.
+CURRENT_OFFSET: dw 0x0800	; What our current offset target is, currently starting at 0x8000.
 READ_ATTEMPTS: db 0x0		; How many disk read attempts so far.
 
 MAX_ATTEMPTS equ 0x5		; How many tries to read the disk before giving up.
@@ -142,9 +162,8 @@ MAX_ATTEMPTS equ 0x5		; How many tries to read the disk before giving up.
 SECONDSTAGE equ 0x7E00		; Location of the second stage bootloader, one sector after 1st stage (usually 0x7E00-0x8000).
 LOADERSECTORS equ 0x1		; Size of the second stage bootloader in sectors.
 
-KERNEL_START equ 0x0800		; Segment offset of the low kernel block.
-TOTALSECTORS equ 0x80		; How many sectors to read from the disk into kernelspace.
-SECTORSIZE equ 0x200		; Standard disk sectors are 512-bytes long.
+TOTALSECTORS equ 0x50		; What LBA sector to stop at.
+SECTORSIZE equ 0x020		; Standard disk sectors are 512-bytes long, and since this is an offset, / 16.
 
 ; MISC:
 	
@@ -175,7 +194,6 @@ _char:
 	ret
 
 read_disk: ; Interrupt values should be pre-set before calling this, it just handles any errors.
-
 	mov byte [READ_ATTEMPTS], 0x0 	; Clear any previous reads' attempts.
 	
 	disk_read:
@@ -262,6 +280,22 @@ ps2_good:						; Re-enable PS2 devices if everything's good.
 	call print_bios
 	ret
 	
+; GET DISK INFO for LBA->CHS CONVERSION:
+get_diskinfo:
+	pusha
+	
+	xor ax, ax
+	mov ah, 0x8				; Call the BIOS for the sectors per track and number of heads.
+	mov dl, [BOOTDRIVE]
+	int 0x13				; On return, number of heads is dh - 1.
+	inc dh					; Increment by one to bring it to 1-indexed CHS format.
+	mov byte [numhd], dh	; And move it into memory.
+	and cl, 0x3F			; Bitwise AND CL to get the sectors per track.
+	mov byte [spt], cl		; And move that into memory.	
+	
+	popa
+	ret
+	
 ; HANDLE LBA->CHS CONVERSION:
 
 lba_chs:			; Takes AX as LBA address, converts it, and saves the value in memory.
@@ -269,16 +303,15 @@ lba_chs:			; Takes AX as LBA address, converts it, and saves the value in memory
 	push dx
 
 	xor dx, dx					; Make sure there isn't anything in dx interfering with div.
-	div [spt]					; Divide LBA (ax) / Sectors Per Track [spt]
+	div word [spt]				; Divide LBA (ax) / Sectors Per Track [spt]
 	mov bx, ax					; Move TEMP from ax to bx. This will be used later.
-	mov byte [sector], dx		; Store the remainder (modulus) in sectors.
-	inc [sector]				; And increment it once, since CHS indexes at 1.
+	mov byte [sector], dl		; Store the remainder (modulus) in sectors.
+	inc byte [sector]			; And increment it once, since CHS indexes at 1.
 	xor dx, dx					; Clear dx again for the next division.
 
-	div [numhd]					; Next, divide ax (TEMP) / [numhd] (number of heads)
-	mov byte [head], dx			; Store the remainder in [head].
-	mov byte [cyl], ax			; And the quotient in [cyl].
-
+	div word [numhd]			; Next, divide ax (TEMP) / [numhd] (number of heads)
+	mov byte [head], dl			; Store the remainder in [head].
+	mov byte [cyl], al			; And the quotient in [cyl].
 
 	pop dx
 	pop ax
@@ -324,8 +357,8 @@ DATA_SEGMENT equ gdt_data - gdt_begin
 ; LBA REQUIRED INFORMATION:
 ; (fill this out before calling lba->chs)
 
-spt: 	db 0x0	; Sectors per track of the boot disk.
-numhd:	db 0x0	; Number of heads of the boot disk.
+spt: 	dw 0x0	; Sectors per track of the boot disk.
+numhd:	dw 0x0	; Number of heads of the boot disk.
 
 
 ; LBA CONVERSION OUTPUTS:
