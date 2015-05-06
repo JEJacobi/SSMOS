@@ -20,19 +20,19 @@ inline bool check_bit(int var, int pos)
 //
 //	Read a byte from the specified port.
 //
-inline char inb(int port)
+inline char inb(short port)
 {
 	char ret;
-	asm volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
+	asm volatile ("inb %1, %0" : "=a"(ret) : "d"(port));
 	return ret;
 }
 
 //
 //	Write a byte to the specified port.
 //
-inline void outb(int port, char val)
+inline void outb(short port, char val)
 {
-	asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));	
+	asm volatile ("outb %0, %1" : : "a"(val), "d"(port));	
 }
 
 //
