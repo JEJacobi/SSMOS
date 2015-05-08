@@ -55,6 +55,7 @@
 #define READ_MULTIPLE		0xC4				// Command to read multiple blocks of sectors, instead of a single one.
 #define WRITE_MULTIPLE		0xC5				// Command to write to multiple blocks of sectors, instead of a single one.
 #define IDENTIFY			0xEC				// Command to signal the ATA bus to identify itself.
+#define DEVICE_DIAGNOSTICS	0x90				// Command to signal device diagnostics to execute.
 
 // MISC:
 

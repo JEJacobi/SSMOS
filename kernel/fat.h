@@ -1,7 +1,10 @@
 #ifndef KERNEL_FAT
 #define KERNEL_FAT
 
-struct FAT_BPB // The BIOS Parameter Block structure, to overlay onto the boot sector. Here, regardless of FAT_type.
+#define EBPB_OFFSET		36			// The offset of the EBPB from the BPB.
+#define BOOTSECTOR		0x7C00		// Address of the beginning of the bootsector, or where the starting BPB is.
+
+typedef struct // The BIOS Parameter Block structure, to overlay onto the boot sector. Here, regardless of FAT_type. 
 {
 	unsigned char startjmp[3];		// The first three bytes of the BPB are always a JMP opcode to the end of it.
 	unsigned char oem_name[8];		// OEM string, although generally useless.
@@ -18,9 +21,9 @@ struct FAT_BPB // The BIOS Parameter Block structure, to overlay onto the boot s
 	unsigned short head_side_count;	// Number of heads (or sides) of the disk.
 	unsigned int hidden_sectors;	// Number of hidden sectors (not reserved) to offset the beginning of the partition to.
 	unsigned int total_sectors_big;	// Large amount of sectors on disk. If it doesn't fit in total_sectors, it does here.
-} __attribute__ ((packed));
+} __attribute__ ((packed)) FAT_BPB; 
 
-struct FAT_EBPB // The Extended BIOS Parameter Block for FAT 12 and FAT 16 partitions.
+typedef struct // The Extended BIOS Parameter Block for FAT 12 and FAT 16 partitions.
 {
 	unsigned char drive_number;		// The BIOS-type drive number. Usually 0x0 for floppies, and 0x80 for HDDs.
 	unsigned char reserved_flags;	// Not used here, usually flags for Windows NT.
@@ -28,9 +31,9 @@ struct FAT_EBPB // The Extended BIOS Parameter Block for FAT 12 and FAT 16 parti
 	unsigned int serial_number;		// Volume serial number, probably ignored.
 	unsigned char volume_label[11];	// The 11-byte volume label.
 	unsigned char system_id[8];		// The string representation of the FAT file system, probably unused.
-} __attribute__ ((packed));
+} __attribute__ ((packed)) FAT_EBPB;
 
-struct FAT32_EBPB // The Extended BIOS Parameter Block for FAT 32 partitions only.
+typedef struct // The Extended BIOS Parameter Block for FAT 32 partitions only.
 {
 	unsigned int sectors_per_fat;	// The FAT32 version of the above BPB sectors_per_fat. Size of the FAT in sectors.
 	unsigned short flags;			// General FAT32 flags.
@@ -45,6 +48,25 @@ struct FAT32_EBPB // The Extended BIOS Parameter Block for FAT 32 partitions onl
 	unsigned int serial_number;		// Volume serial number, probably ignored.
 	unsigned char volume_label[11];	// The 11-byte volume label.
 	unsigned char system_id[8];		// The string representation of the FAT file system, probably unused.
-} __attribute__ ((packed));
+} __attribute__ ((packed)) FAT32_EBPB;
+
+//////////////////////////////////////////////////////////////////////////////
+
+typedef enum 								// Types of FAT file system.
+{
+	FAT12, FAT16, FAT32, exFAT
+} FAT_TYPE;
+
+FAT_TYPE get_FAT_type(FAT_BPB* bpb);		// Returns the type of FAT file system at bpb*.
+
+void* get_EBPB(FAT_BPB* bpb);				// Get a pointer to the EBPB from a pointer of the BPB.
+											// DOES NOT DIFFERENTIATE FROM FAT12/16 and FAT32!
+											
+unsigned int get_sectors(FAT_BPB* bpb);		// Return the total number of sectors, regardless of FAT type.
+unsigned int get_fat_size(FAT_BPB* bpb);	// Return the FAT size in sectors, regardless of FAT type.
+unsigned int get_data(FAT_BPB* bpb);		// Returns the first data sector (after reserved and root directory).
+unsigned int get_FAT(FAT_BPB* bpb);			// Returns the first sector of the FAT.
+unsigned int get_data_count(FAT_BPB* bpb);	// Returns the total amount of data sectors.
+unsigned int get_clusters(FAT_BPB* bpb);	// Return the total number of clusters.
 
 #endif
