@@ -63,6 +63,7 @@ void* get_EBPB(FAT_BPB* bpb);				// Get a pointer to the EBPB from a pointer of 
 											// DOES NOT DIFFERENTIATE FROM FAT12/16 and FAT32!
 											
 unsigned int get_sectors(FAT_BPB* bpb);		// Return the total number of sectors, regardless of FAT type.
+unsigned int get_rootdir_size(FAT_BPB* bpb);// Return the size of root directory. (If it's FAT32, this is 0).
 unsigned int get_fat_size(FAT_BPB* bpb);	// Return the FAT size in sectors, regardless of FAT type.
 unsigned int get_data(FAT_BPB* bpb);		// Returns the first data sector (after reserved and root directory).
 unsigned int get_FAT(FAT_BPB* bpb);			// Returns the first sector of the FAT.
