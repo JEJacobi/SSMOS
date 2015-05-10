@@ -62,24 +62,30 @@
 
 // MISC:
 
+#define IDENTIFY_SIZE		256					// Size of the IDENTIFY return/buffer.
+
 #define TIMEOUT				20000				// Command timeout threshold, in milliseconds.
 
 #define FLOATING_BUS		0xFF				// If this is read from the regular status byte, the bus has no drives.
 
 typedef enum { PRIMARY, SECONDARY } ATA_BUS;
 typedef enum { MASTER, SLAVE } ATA_DRIVE;
-typedef enum { ATA, ATAPI, NONE } ATA_TYPE;
+typedef enum { ATA, ATAPI, SATA, SATAPI, NONE } ATA_TYPE;
 
 void ata_select(ATA_BUS bus, ATA_DRIVE drive);	// Selects drive for operations on the provided bus.
 void ata_delay(ATA_BUS bus);					// Creates the standard 500ns delay by reading status port data from bus.
 void ata_flush(ATA_BUS bus);					// Issue a cache flush command to the specified bus.
 bool ata_floating(ATA_BUS bus);					// Check if the bus is floating (no drives connected). Returns true if it is.
 bool ata_exists(ATA_BUS bus, ATA_DRIVE drive);	// See if drive primary/secondary : master/slave exists. WILL OVERWRITE identify[].
-void ata_identify(ATA_BUS bus, ATA_DRIVE drive);// IDENTIFY the target drive and load it into the identify[] buffer.
+bool ata_identify(ATA_BUS bus, ATA_DRIVE drive);// IDENTIFY the target drive and load it into the identify[] buffer.
 ATA_TYPE ata_type(ATA_BUS bus, ATA_DRIVE drive);// Return the type of drive at the specified location. Returns NONE if no drive.
 void ata_reset(ATA_BUS bus);					// Reset all ATA drives on the specified bus.
 void ata_irq(ATA_BUS bus);						// ATA IRQ handler. Does nothing right now.
+bool ata_poll_drq(ATA_BUS bus);					// Waits for DRQ to unset, returns true if successful. Returns false if ERR sets.
 void ata_poll_bsy(ATA_BUS bus);					// Poll until BSY goes away. Probably add a timeout at some point.
+char* ata_tostring(ATA_BUS bus, ATA_DRIVE drive);// Return a string containing the ATA type.
+
+// Return values are generally used as error checking here.
 
 #endif
 

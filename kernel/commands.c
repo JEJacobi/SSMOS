@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "ata.h"
 #include "cmos.h"
 #include "date.h"
 #include "debug.h"
@@ -210,6 +211,29 @@ int disk(char* params)
 	string_set(stringbuffer, "Floppy Drive #2  (Slave): ");
 	string_add(stringbuffer, floppy_getstring(true));
 	writeline(stringbuffer->data); // Print slave floppy disk information.
+	
+	writeline("");
+	
+	if (ata_floating(PRIMARY) == false) // If there are drives on the primary bus.
+	{
+		string_set(stringbuffer, "Primary ATA #1: ");
+		string_add(stringbuffer, ata_tostring(PRIMARY, MASTER));
+		writeline(stringbuffer->data);
+		
+		string_set(stringbuffer, "Primary ATA #2: ");
+		string_add(stringbuffer, ata_tostring(PRIMARY, SLAVE));
+		writeline(stringbuffer->data);
+	}
+	if (ata_floating(SECONDARY) == false) // If there are drives on the secondary bus.
+	{
+		string_set(stringbuffer, "Secondary ATA #1: ");
+		string_add(stringbuffer, ata_tostring(SECONDARY, MASTER));
+		writeline(stringbuffer->data);
+		
+		string_set(stringbuffer, "Secondary ATA #2: ");
+		string_add(stringbuffer, ata_tostring(SECONDARY, SLAVE));
+		writeline(stringbuffer->data);
+	}
 	
 	return SIG_SUCCESS;
 }

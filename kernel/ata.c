@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "hardware.h"
+#include "timer.h"
 
-uint16_t identify[256]; // The buffer for reading IDENTIFY returns. Is always 256 16-bit values.
-ATA_DRIVE primary_selected; // Which drive is currently selected on the primary bus.
-ATA_DRIVE secondary_selected; // Which drive is currently selected on the secondary bus.
+uint16_t identify[IDENTIFY_SIZE]; 	// The buffer for reading IDENTIFY returns. Is always 256 16-bit values.
+ATA_DRIVE primary_selected; 		// Which drive is currently selected on the primary bus.
+ATA_DRIVE secondary_selected; 		// Which drive is currently selected on the secondary bus.
 
 void ata_select(ATA_BUS bus, ATA_DRIVE drive)
 {
@@ -91,18 +92,22 @@ bool ata_exists(ATA_BUS bus, ATA_DRIVE drive)
 	return false; // TEMP
 }
 
-void ata_identify(ATA_BUS bus, ATA_DRIVE drive)
+bool ata_identify(ATA_BUS bus, ATA_DRIVE drive)
 {
+	int i;
+	short data;
 	short clear;
 	short cmd;
 	
 	if (bus == PRIMARY) // Port will be used for clearing values.
 	{
+		data = PRIMARY_DATA;
 		clear = PRIMARY_SECTOR;
 		cmd = PRIMARY_CMD_STATUS;
 	}
 	else
 	{
+		data = SECONDARY_DATA;
 		clear = SECONDARY_SECTOR;
 		cmd = SECONDARY_CMD_STATUS;
 	}
@@ -119,17 +124,22 @@ void ata_identify(ATA_BUS bus, ATA_DRIVE drive)
 	
 	outb(cmd, IDENTIFY); // Send the identify command to the selected drive on the provided bus.
 	if (inb(cmd) == 0x0)
-		return; // Return if we've just sent IDENTIFY to a non-existing drive.
+		return false; // Return if we've just sent IDENTIFY to a non-existing drive.
 	
 	ata_poll_bsy(bus);
 	
 	if (inb(clear) != 0x0) // Check LBA high to be non-zero, and return if it is.
-		return;
+		return false;
 	clear--;
 	if (inb(clear) != 0x0) // Check LBA mid to be non-zero, and return if it is.
-		return;
+		return false;
 		
-	// TODO: Poll until DRQ or ERR sets, and read data into IDENTIFY buffer.
+	if (ata_poll_drq(bus) == false) // Poll DRQ until either it or ERR sets.
+		return false; // TEMP, should actually add some error handling at some point.
+		
+	for (i = 0; i < IDENTIFY_SIZE; i++)
+		identify[i] = inw(data); // Read 256 words from the data port.
+	return true;
 }
 
 ATA_TYPE ata_type(ATA_BUS bus, ATA_DRIVE drive)
@@ -149,20 +159,74 @@ ATA_TYPE ata_type(ATA_BUS bus, ATA_DRIVE drive)
 	lba_mid = inb(port); // Read signature byte from LBA_mid.
 	lba_high = inb(port + 1); // And read the other byte from LBA_high.
 	
-	// TODO: Signature byte differentiating magic goes here. After I figure out what it does.
+	if (lba_mid == 0x0 && lba_high == 0x0)
+		return ATA;
+	if (lba_mid == 0x3C && lba_high == 0xC3)
+		return SATA;
+	if (lba_mid == 0x14 && lba_high == 0xEB)
+		return ATAPI;
+	if (lba_mid == 0x69 && lba_high == 0x96)
+		return SATAPI;
 	
 	return NONE;
 }
 
 void ata_reset(ATA_BUS bus)
 {
-	// TODO: Set bit two on the bus control register, wait a bit, and clear it.
+	short port;
+	
+	if (ata_floating(bus) == true)
+		return; // If the bus is floating, nothing to reset.
+	
+	if (bus == PRIMARY)
+	{
+		port = PRIMARY_DCR;
+		primary_selected = MASTER; // On software reset, the master is automatically selected.
+	}
+	else
+	{
+		port = SECONDARY_DCR;
+		secondary_selected = MASTER; // Same for the secondary.
+	}
+	
+	outb(port, 0x4);	// (0000 0100) - 2nd bit is the software reset flag.
+	outb(port, 0x0);	// And once the drive is reset, clear the DCR manually.
+	ata_delay(bus);		// Create a little bit of delay for the status registers to update.
+	
+	// Loop until BSY is gone and RDY is set.
+	while (	check_bit(inb(port), STATUS_RDY) == false 
+			|| check_bit(inb(port), STATUS_BSY) == true) { }
 }
 
 void ata_irq(ATA_BUS bus)
 {
 	// Do I even need to use this at all?
 	// Maybe just totally disable IRQs in init.
+}
+
+bool ata_poll_drq(ATA_BUS bus)
+{
+	short reg;
+	char status;
+	
+	if (bus == PRIMARY)
+		reg = PRIMARY_CMD_STATUS;
+	else
+		reg = SECONDARY_CMD_STATUS;
+	
+	do
+	{
+		status = inb(reg);
+		
+		if (check_bit(status, STATUS_ERR) == true)
+			return false; // If ERR has set, something's gone wrong, return false.
+	} while (check_bit(status, STATUS_DRQ) == false);
+
+	if (check_bit(status, STATUS_DRQ) == true &&
+		check_bit(status, STATUS_ERR) == false)
+		return true; // Make doubly sure ERR hasn't set, but DRQ has.
+	else
+		return false;
 }
 
 void ata_poll_bsy(ATA_BUS bus)
@@ -179,4 +243,23 @@ void ata_poll_bsy(ATA_BUS bus)
 	{
 		status = inb(reg);
 	} while (check_bit(status, STATUS_BSY) == true);
+}
+
+char* ata_tostring(ATA_BUS bus, ATA_DRIVE drive)
+{
+	switch (ata_type(bus, drive))
+	{
+		case ATA:
+			return "ATA";
+		case ATAPI:
+			return "ATAPI";
+		case SATA:
+			return "SATA";
+		case SATAPI:
+			return "SATAPI";
+		case NONE:
+			return "NONE/UNSUPPORTED";
+		default:
+			return "ERROR!";
+	}
 }
