@@ -47,7 +47,7 @@ void list_add(struct element* list, void* val)
 
 void list_addat(struct element* list, void* val, int index)
 {
-	if (list == NULL)
+	if (list == NULL || index < 0 || index > list_count(list) - 1)
 		return;
 	
 	struct element* prev = get_at(list, index); // First, get a pointer to the indexed item.
@@ -62,7 +62,9 @@ void list_addat(struct element* list, void* val, int index)
 	newelem->next = next;
 	
 	prev->next = newelem; // Then for the surrounding elements.
-	next->prev = newelem;
+
+	if (next != NULL)
+		next->prev = newelem;
 }
 
 void list_addfirst(struct element* list, void* val)
@@ -82,31 +84,29 @@ void list_remove(struct element* item)
 {
 	if (item == NULL)
 		return;
-	
+
 	// Get pointers to the elements around item.
 	struct element* prev = item->prev;
 	struct element* next = item->next;
 
 	// Splice item out of the linked list.
-	prev->next = next;
-	next->prev = prev;
+	if (prev != NULL)
+		prev->next = next;
+	if (next != NULL)
+		next->prev = prev;
 	
 	free(item); // And lastly, free the actual element.
 }
 
 void list_removeat(struct element* list, int index)
 {
-	if (list == NULL)
+	if (list == NULL || index < 0 || index > (list_count(list) - 1))
 		return; // Error checking.
 	
-	if (index < 0)
-		index = 0;
-	
-	if (index > list_count(list) - 1)
-		index = list_count(list) - 1;
-	
-	
-	list_remove(get_at(list, index));
+	if (get_at(list, index) == NULL)
+		return;
+	else
+		list_remove(get_at(list, index));
 }
 
 void list_removelast(struct element* list)
@@ -116,6 +116,7 @@ void list_removelast(struct element* list)
 	
 	list_remove(get_last(list));
 }
+
 
 int list_count(struct element* list)
 {
@@ -172,17 +173,14 @@ struct element* get_last(struct element* list)
 
 struct element* get_at(struct element* list, int index)
 {
-	if (list == NULL)
+	if (list == NULL || index < 0 || index > list_count(list) - 1)
 		return NULL;
 	
-	if (index < 0 || index > list_count(list))
-		return NULL; // Error check, make sure index isn't negative or out of bounds.
-
 	int i = 0;
-	int max = list_count(list);
+	int max = list_count(list) - 1;
 	list = get_first(list); // Set the list pointer to the first value.
 	
-	while (i != index)
+	while (i < index)
 	{
 		i++; // Increment both the element pointer and the index counter until both are equal.
 		list = list->next;
@@ -190,5 +188,6 @@ struct element* get_at(struct element* list, int index)
 		if (i > max || list == NULL)
 			return NULL; // Check for out of bounds or overflow, and return NULL.
 	}
+
 	return list;
 }

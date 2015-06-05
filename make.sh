@@ -12,7 +12,7 @@ echo -n `date` >> kernel/date.h
 echo -n "\"" >> kernel/date.h
 
 CC=i686-elf-gcc
-CFLAGS="-std=gnu99 -nostdlib -ffreestanding -Os -Wall -fno-exceptions -mno-red-zone -fno-optimize-sibling-calls -fno-strict-aliasing -fno-delete-null-pointer-checks"
+CFLAGS="-std=gnu99 -nostdlib -ffreestanding -Os -Wall -Wno-unused-parameter -Wextra -fno-exceptions -mno-red-zone -fno-optimize-sibling-calls -fno-strict-aliasing -fno-delete-null-pointer-checks"
 LIB="-static -L../ -lssmos -I../lib"
 
 # Compile the system library first.

@@ -99,7 +99,7 @@ void handle_input()
 	else if (t == '\b') // If the key entered is backspace, handle removing chars. (TODO: Also DEL)
 	{
 		cursor_x--;
-		if (cursor_x < prompt_string_length)
+		if ((unsigned int)cursor_x < prompt_string_length)
 			cursor_x = prompt_string_length; // Make sure the cursor never goes behind the prompt.
 		
 		if(input_ptr > 0) // Make sure input_ptr is bigger than zero.

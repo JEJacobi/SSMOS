@@ -201,11 +201,12 @@ struct memory_header* to_header(void* data)
 
 //
 //	Standard C-library basic memory functions.
+//	TODO: Move these to userland library or something. No reason for them to be syscalls.
 //
 
 void kmemcpy(void *dest, void *src, size_t sz)
 {
-	int i;
+	unsigned int i;
 	
 	for (i = 0; i < sz; i++)
 	{
@@ -215,7 +216,7 @@ void kmemcpy(void *dest, void *src, size_t sz)
 
 void kmemset(void *dest, char c, size_t sz)
 {
-	int i;
+	unsigned int i;
 	
 	for (i = 0; i < sz; i++)
 	{

@@ -15,7 +15,7 @@ struct memory_header
 {
 	void* next_ptr;
 	void* prev_ptr;
-	int block_size;
+	size_t block_size;
 	int is_free;
 } __attribute__ ((packed));
 

@@ -68,7 +68,7 @@ char *strncat(char *dest, char *src, size_t n)
 	if (dest == NULL || src == NULL || n < 1)
 		return dest;
 	
-	int i;
+	unsigned int i;
 	char* x = dest;
 	char* y = src;
 	
@@ -112,7 +112,7 @@ int strcmp(char *str1, char *str2)
 
 char* strtok(char* str, char* delim)
 {
-	
+	return 0; // TEMP : Not yet implemented.
 }
 
 void strrev(char* begin, char* end) // Also shamelessly modified from a K&R offshoot thing.
@@ -207,9 +207,6 @@ string* string_newsz(size_t init)
 	string* str = (string*)malloc(sizeof(string));
 	if (str == NULL)
 		return NULL;
-		
-	if (init < 0)
-		init = 0; // Clamp the size to zero, which would just be the null terminator.
 	
 	// Initialize the values.
 	str->size = init + 1; // +1 because strlen doesn't take space for the null-terminator into account.
@@ -301,7 +298,7 @@ void string_clear(string* str)
 	if (str == NULL)
 		return;
 	
-	int i;
+	unsigned int i;
 	
 	for (i = 0; i < str->size; i++)
 	{
@@ -311,7 +308,7 @@ void string_clear(string* str)
 
 void string_resize(string* str, size_t newsz)
 {
-	if (str == NULL || newsz < 0)
+	if (str == NULL)
 		return;
 	
 	size_t oldsz = str->size; // Temporarily store the old size.
