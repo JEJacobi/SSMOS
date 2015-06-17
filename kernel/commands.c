@@ -203,7 +203,7 @@ int disk(char* params)
 	// TODO: Do something with params at some point.
 	
 	string* stringbuffer = string_newsz(80);
-	
+
 	string_set(stringbuffer, "Floppy Drive #1 (Master): ");
 	string_add(stringbuffer, floppy_getstring(false));
 	writeline(stringbuffer->data); // Print master floppy disk information.
@@ -213,6 +213,8 @@ int disk(char* params)
 	writeline(stringbuffer->data); // Print slave floppy disk information.
 	
 	writeline("");
+	
+	writeline("ATA Drives:");
 	
 	if (ata_floating(PRIMARY) == false) // If there are drives on the primary bus.
 	{
@@ -224,6 +226,8 @@ int disk(char* params)
 		string_add(stringbuffer, ata_tostring(PRIMARY, SLAVE));
 		writeline(stringbuffer->data);
 	}
+	else
+		writeline("No Primary ATA devices detected.");
 	if (ata_floating(SECONDARY) == false) // If there are drives on the secondary bus.
 	{
 		string_set(stringbuffer, "Secondary ATA #1: ");
@@ -234,7 +238,9 @@ int disk(char* params)
 		string_add(stringbuffer, ata_tostring(SECONDARY, SLAVE));
 		writeline(stringbuffer->data);
 	}
-	
+	else
+		writeline("No Secondary ATA devices detected.");
+
 	return SIG_SUCCESS;
 }
 

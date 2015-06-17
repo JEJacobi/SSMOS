@@ -77,7 +77,8 @@ bool ata_floating(ATA_BUS bus)
 	else
 		port = SECONDARY_CMD_STATUS;
 	
-	if (inb(port) == FLOATING_BUS) // Read the status byte and check for a floating bus (no devices attached).
+	if (inb(port) == FLOATING_BUS ||
+		inb(port) == 0x0) // Read the status byte and check for a floating bus (no devices attached).
 		return true;
 	else
 		return false;
