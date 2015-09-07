@@ -14,7 +14,7 @@
 //
 inline bool check_bit(int var, int pos)
 {
-	return ((var) & (1<<(pos)));
+    return ((var) & (1<<(pos)));
 }
 
 //
@@ -22,7 +22,7 @@ inline bool check_bit(int var, int pos)
 //
 inline int set_bit(int var, int pos)
 {
-	return var |= (1 << pos);
+    return var |= (1 << pos);
 }
 
 //
@@ -30,7 +30,7 @@ inline int set_bit(int var, int pos)
 //
 inline int toggle_bit(int var, int pos)
 {
-	return var ^ (1 << pos);
+    return var ^ (1 << pos);
 }
 
 //
@@ -38,9 +38,9 @@ inline int toggle_bit(int var, int pos)
 //
 inline uint8_t inb(short port)
 {
-	uint8_t ret;
-	asm volatile ("inb %1, %0" : "=a"(ret) : "d"(port));
-	return ret;
+    uint8_t ret;
+    asm volatile ("inb %1, %0" : "=a"(ret) : "d"(port));
+    return ret;
 }
 
 //
@@ -48,9 +48,9 @@ inline uint8_t inb(short port)
 //
 inline uint16_t inw(short port)
 {
-	uint16_t ret;
-	asm volatile ("inw %1, %0" : "=a"(ret) : "d"(port));
-	return ret;
+    uint16_t ret;
+    asm volatile ("inw %1, %0" : "=a"(ret) : "d"(port));
+    return ret;
 }
 
 //
@@ -58,7 +58,7 @@ inline uint16_t inw(short port)
 //
 inline void outb(short port, uint8_t val)
 {
-	asm volatile ("outb %0, %1" : : "a"(val), "d"(port));	
+    asm volatile ("outb %0, %1" : : "a"(val), "d"(port));   
 }
 
 //
@@ -66,7 +66,7 @@ inline void outb(short port, uint8_t val)
 //
 inline void outw(short port, uint16_t val)
 {
-	asm volatile ("outw %0, %1" : : "a"(val), "d"(port));	
+    asm volatile ("outw %0, %1" : : "a"(val), "d"(port));   
 }
 
 //
@@ -74,8 +74,8 @@ inline void outw(short port, uint16_t val)
 //
 inline void io_wait()
 {
-	asm volatile ( 	"jmp 1f\n\t"
-					"1:jmp 2f\n\t"
-					"2:" );
+    asm volatile (  "jmp 1f\n\t"
+                    "1:jmp 2f\n\t"
+                    "2:" );
 }
 #endif

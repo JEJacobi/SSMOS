@@ -1,4 +1,4 @@
-#!/bin/sh\
+#!/bin/sh
 
 rm ssmos.bin
 rm libssmos.a
